@@ -1,9 +1,11 @@
 SDL 1.2.15 WITH DISPMANX AND KMS BACKENDS
-JARL
+=========================================
+
 This is essentialy a libSDL 1.2.15 release with KMS framebuffer and dispmanx backends.
 These backends are made taking the fbcon backend as a base.
 
 COMPILING AND INSTALLING
+========================
 
 The KMS backend requires recent versions of libkms and libdrm (NOT the dispmanx backend on the Pi! KMS is different stuff).
 The DISPMANX backend is meant to work on Raspbian (Raspberry Pi Debian distro), wich includes all the needed
@@ -16,6 +18,7 @@ header files and libs in the /opt/vc directories.
 -Run make && sudo make install. 
 
 IMPORTANT NOTES
+===============
 
 -The KMS backend is experimental: it may show tearing / flickering. It will be fixed after atomic page-flip is merged
  into the mainline kernel. Raspberry Pi DISPMANX backend is stable.
@@ -47,7 +50,7 @@ IMPORTANT NOTES
  so to say. SDL_Flip() is meant to be blocking since we have to 1) keep the visible buffer contents intact until it's 
  replaced with the just drawn one 2) that swap will occur during vsync as noted. 
 
-contact
+contact information
 
 Manuel Alfayate Corchete
 redwindwanderer@gmail.com
