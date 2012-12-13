@@ -1,5 +1,5 @@
 SDL 1.2.15 WITH DISPMANX AND KMS BACKENDS
-
+JARL
 This is essentialy a libSDL 1.2.15 release with KMS framebuffer and dispmanx backends.
 These backends are made taking the fbcon backend as a base.
 
