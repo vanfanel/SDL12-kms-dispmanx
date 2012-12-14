@@ -1,27 +1,16 @@
 /*
     SDL - Simple DirectMedia Layer
     Copyright (C) 1997-2012 Sam Lantinga
-
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
-    License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
-
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public
-    License along with this library; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-
+    
     Sam Lantinga
     slouken@libsdl.org
+    
+    SDL KMS driver/backend
+    Copyright (C) 2012 Manuel Alfayate 
 */
 #include "SDL_config.h"
 
-/* Framebuffer console based SDL video driver implementation.
+/* KMS framebuffer SDL video driver implementation.
 */
 
 #include <stdio.h>
@@ -292,7 +281,7 @@ static int KMS_VideoInit(_THIS, SDL_PixelFormat *vformat)
            }
            drmModeFreeConnector (connector);
 	}
-        
+       
 	if (i == resources->count_connectors){
            printf ("\nERR - No conectores conectados\n");
 	   return (-1);	
@@ -311,7 +300,8 @@ static int KMS_VideoInit(_THIS, SDL_PixelFormat *vformat)
         	drmModeFreeEncoder(encoder);
 	}
         
-	/* Limpiamos listas de modos disponibles y añadimos el modo en uso */
+	/* Limpiamos listas de modos disponibles y añadimos los modos desde la lista de modos*/
+	/* Esto se puede hacer mejor añadiendo los modos desde los modos del conector        */
 	for ( i=0; i<NUM_MODELISTS; ++i ) {
 		SDL_nummodes[i] = 0;
 		SDL_modelist[i] = NULL;
@@ -329,10 +319,14 @@ static int KMS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	   }
 	}
 	
-	//KMS_VideoQuit(this);	
-	this->info.wm_available = 0;
-	this->info.hw_available = 1;
-	
+	//MAC Para que las funciones GetVideoInfo() devuelvan un SDL_VideoInfo con contenidos.
+        //NOTA: Los valores de current_h y current_w están puestos a fuego pero esto ESTÁ MAL.
+	//Arréglalo cuando retomes este backend!!!
+	this->info.current_w = 1920;
+        this->info.current_h = 1080;
+        this->info.wm_available = 0;
+        this->info.hw_available = 1;
+        this->info.video_mem = 32768 /1024;	
 	this->info.video_mem = 32768 /1024;
 
 	/* Enable mouse and keyboard support */
@@ -458,14 +452,13 @@ static SDL_Surface *KMS_SetVideoMode(_THIS, SDL_Surface *current,
 
 	unsigned handle;
 	
-	//Se fuerzan los flags para pantalla completa y doble buffer. También se hace
-	//en SDL_video.c
-	
+	//Se fuerzan los flags para pantalla completa. 
 	shadow_fb = 0;
 	current->flags |= SDL_FULLSCREEN;
 	current->flags |= SDL_HWSURFACE;
 	current->flags |= SDL_HWPALETTE;
-	current->flags |= SDL_DOUBLEBUF;
+	if (flags & SDL_DOUBLEBUF)
+           current->flags |= SDL_DOUBLEBUF;
 
 	//De modinfo necesitamos estos y otros 10 vaores que completamos
 	//con la llamada a complete_mode()

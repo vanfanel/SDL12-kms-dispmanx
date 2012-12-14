@@ -262,6 +262,13 @@ static int DISPMANX_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	assert(ret == 0);
 	vformat->BitsPerPixel = 16; //Pon lo que quieras.Era para restaurar fb
 	
+	//MAC Para que las funciones GetVideoInfo() devuelvan un SDL_VideoInfo con contenidos.
+	this->info.current_w = dispvars->amode.width;
+        this->info.current_h = dispvars->amode.height;
+        this->info.wm_available = 0;
+        this->info.hw_available = 1;
+	this->info.video_mem = 32768 /1024;
+		
 	printf( "Physical video mode is %d x %d\n", 
 	   dispvars->amode.width, dispvars->amode.height );
 	
@@ -286,11 +293,6 @@ static int DISPMANX_VideoInit(_THIS, SDL_PixelFormat *vformat)
               printf("Adding video mode: %d x %d - %d bpp\n", dispvars->amode.width,
                  dispvars->amode.height, (i+1)*8);
         }
-
-	this->info.wm_available = 0;
-	this->info.hw_available = !shadow_fb;
-	
-	this->info.video_mem = 32768 /1024;
 
 	/* Enable mouse and keyboard support */
 	if ( DISPMANX_OpenKeyboard(this) < 0 ) {
@@ -804,6 +806,7 @@ static void DISPMANX_VideoQuit(_THIS)
     	vc_dispmanx_resource_delete( dispvars->resources[1] );
 	vc_dispmanx_display_close( dispvars->display );
 	vc_dispmanx_update_submit_sync( dispvars->update );		
+	bcm_host_deinit();
 
 	DISPMANX_CloseMouse(this);
 	DISPMANX_CloseKeyboard(this);
