@@ -339,6 +339,9 @@ const SDL_VideoInfo *SDL_GetVideoInfo(void)
 	return(info);*/
 }
 
+SDL_Rect ** SDL_ListModes (SDL_PixelFormat *format, Uint32 flags){
+	return NULL;
+}
 /*
  * Check to see if a particular video mode is supported.
  * It returns 0 if the requested mode is not supported under any bit depth,
@@ -363,78 +366,6 @@ int SDL_VideoModeOK (int width, int height, int bpp, Uint32 flags)
 	printf ("\n[WARNING] MAC Dispmanx : Program calls VideoModeOK(). Always returning true! \n");
 	return 1;
 }
-
-/*
- * Get the closest non-emulated video mode to the one requested
- */
-/*static int SDL_GetVideoMode (int *w, int *h, int *BitsPerPixel, Uint32 flags)
-{
-	int table, b, i;
-	int supported;
-	int native_bpp;
-	SDL_PixelFormat format;
-	SDL_Rect **sizes;
-
-	// Check parameters
-	if ( *BitsPerPixel < 8 || *BitsPerPixel > 32 ) {
-		SDL_SetError("Invalid bits per pixel (range is {8...32})");
-		return(0);
-	}
-	if ((*w <= 0) || (*h <= 0)) {
-		SDL_SetError("Invalid width or height");
-		return(0);
-	}
-
-	// Try the original video mode, get the closest depth
-	native_bpp = SDL_VideoModeOK(*w, *h, *BitsPerPixel, flags);
-	if ( native_bpp == *BitsPerPixel ) {
-		return(1);
-	}
-	if ( native_bpp > 0 ) {
-		*BitsPerPixel = native_bpp;
-		return(1);
-	}
-
-	// No exact size match at any depth, look for closest match
-	SDL_memset(&format, 0, sizeof(format));
-	supported = 0;
-	table = ((*BitsPerPixel+7)/8)-1;
-	SDL_closest_depths[table][0] = *BitsPerPixel;
-	SDL_closest_depths[table][7] = SDL_VideoSurface->format->BitsPerPixel;
-	for ( b = 0; !supported && SDL_closest_depths[table][b]; ++b ) {
-		int best;
-
-		format.BitsPerPixel = SDL_closest_depths[table][b];
-		sizes = SDL_ListModes(&format, flags);
-		if ( sizes == (SDL_Rect **)0 ) {
-			//No sizes supported at this bit-depth
-			continue;
-		}
-		best=0;
-		for ( i=0; sizes[i]; ++i ) {
-			// Mode with both dimensions bigger or equal than asked ? 
-			if ((sizes[i]->w >= *w) && (sizes[i]->h >= *h)) {
-				// Mode with any dimension smaller or equal than current best ?
-				if ((sizes[i]->w <= sizes[best]->w) || (sizes[i]->h <= sizes[best]->h)) {
-					// Now choose the mode that has less pixels 
-					if ((sizes[i]->w * sizes[i]->h) <= (sizes[best]->w * sizes[best]->h)) {
-						best=i;
-						supported = 1;
-					}
-				}
-			}
-		}
-		if (supported) {
-			*w=sizes[best]->w;
-			*h=sizes[best]->h;
-			*BitsPerPixel = SDL_closest_depths[table][b];
-		}
-	}
-	if ( ! supported ) {
-		SDL_SetError("No video mode large enough for %dx%d", *w, *h);
-	}
-	return(supported);
-}*/
 
 /* This should probably go somewhere else -- like SDL_surface.c */
 static void SDL_ClearSurface(SDL_Surface *surface)

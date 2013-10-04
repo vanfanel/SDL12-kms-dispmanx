@@ -39,7 +39,6 @@
 
 /* Initialization/Query functions */
 static int DISPMANX_VideoInit(_THIS, SDL_PixelFormat *vformat);
-static SDL_Rect **DISPMANX_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags);
 static SDL_Surface *DISPMANX_SetVideoMode(_THIS, SDL_Surface *current, int width, int height, int bpp, Uint32 flags);
 static int DISPMANX_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors);
 static void DISPMANX_VideoQuit(_THIS);
@@ -146,7 +145,6 @@ static SDL_VideoDevice *DISPMANX_CreateDevice(int devindex)
 
 	/* Set the function pointers */
 	this->VideoInit = DISPMANX_VideoInit;
-	this->ListModes = DISPMANX_ListModes;
 	this->SetVideoMode = DISPMANX_SetVideoMode;
 	this->SetColors = DISPMANX_SetColors;
 	this->UpdateRects = DISPMANX_DirectUpdate;
@@ -211,12 +209,6 @@ static int DISPMANX_VideoInit(_THIS, SDL_PixelFormat *vformat)
 
 	/* We're done! */
 	return(0);
-}
-
-static SDL_Rect **DISPMANX_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags)
-{
-	//No hay modos gráficos que listar.
-	return(NULL);
 }
 
 static SDL_Surface *DISPMANX_SetVideoMode(_THIS, SDL_Surface *current,
