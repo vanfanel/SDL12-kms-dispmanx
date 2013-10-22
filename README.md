@@ -17,6 +17,14 @@ header files and libs in the /opt/vc directories.
 
 -Run make && sudo make install. 
 
+-You can disable aspect ratio correction (for 4:3 games/apps in 16:9 displays) by setting the enviroment 
+variable SDL_DISPMANX_IGNORE_RATIO=1
+For example, you could run:
+
+SDL_DISPMANX_IGNORE_RATIO=1 ./scummvm 
+
+to have the dispmanx SDL backend to scale the games to fullscreen size withour keeping the 4:3 ratio. 
+
 IMPORTANT NOTES
 ===============
 
