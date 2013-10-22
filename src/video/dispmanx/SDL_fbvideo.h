@@ -1,3 +1,5 @@
+
+
 #include "SDL_config.h"
 
 #ifndef _SDL_fbvideo_h
@@ -16,6 +18,12 @@
 
 //MAC includes
 #include "bcm_host.h"
+
+//#define debug_mode
+
+#ifdef debug_mode
+	FILE *fp;
+#endif
 //
 
 /* Hidden "this" pointer for the video functions */
@@ -45,7 +53,9 @@ struct SDL_PrivateVideoData {
 	int console_fd;
 	DISPMANX_MODEINFO_T cache_modinfo;
 	DISPMANX_MODEINFO_T saved_modinfo;
-	//drmModeFB cache_fbinfo;
+	struct fb_var_screeninfo screen_vinfo;
+	struct fb_var_screeninfo saved_vinfo;
+	struct fb_var_screeninfo cache_vinfo;
 	int saved_cmaplen;
 	__u16 *saved_cmap;
 
@@ -103,6 +113,8 @@ struct SDL_PrivateVideoData {
 #define cache_modinfo		(this->hidden->cache_modinfo)
 #define cache_fbinfo            (this->hidden->cache_fbinfo)
 #define saved_modinfo		(this->hidden->saved_modinfo)
+#define saved_vinfo             (this->hidden->saved_vinfo)
+#define cache_vinfo             (this->hidden->cache_vinfo)
 #define saved_cmaplen		(this->hidden->saved_cmaplen)
 #define saved_cmap		(this->hidden->saved_cmap)
 #define mapped_mem		(this->hidden->mapped_mem)
@@ -129,6 +141,10 @@ struct SDL_PrivateVideoData {
 #define screen_palette		(this->hidden->screen_palette)
 #define wait_vbl		(this->hidden->wait_vbl)
 #define wait_idle		(this->hidden->wait_idle)
+
+/* These functions are defined in SDL_fbvideo.c */
+extern void DISPMANX_SavePaletteTo(_THIS, int palette_len, __u16 *area);
+extern void DISPMANX_RestorePaletteFrom(_THIS, int palette_len, __u16 *area);
 
 /* These are utility functions for working with video surfaces */
 

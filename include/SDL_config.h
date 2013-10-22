@@ -206,7 +206,7 @@
 
 /* Enable various input drivers */
 #define SDL_INPUT_LINUXEV 1
-#define SDL_INPUT_TSLIB 1
+/* #undef SDL_INPUT_TSLIB */
 /* #undef SDL_JOYSTICK_BEOS */
 /* #undef SDL_JOYSTICK_DC */
 /* #undef SDL_JOYSTICK_DUMMY */
@@ -298,8 +298,8 @@
 /* #undef SDL_VIDEO_DRIVER_XBIOS */
 
 /* Enable OpenGL support */
-#define SDL_VIDEO_OPENGL 1
-#define SDL_VIDEO_OPENGL_GLX 1
+/* #undef SDL_VIDEO_OPENGL */
+/* #undef SDL_VIDEO_OPENGL_GLX */
 /* #undef SDL_VIDEO_OPENGL_WGL */
 /* #undef SDL_VIDEO_OPENGL_OSMESA */
 /* #undef SDL_VIDEO_OPENGL_OSMESA_DYNAMIC */

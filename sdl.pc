@@ -1,7 +1,7 @@
 # sdl pkg-config source file
 
-prefix=/usr
-exec_prefix=/usr
+prefix=/usr/local
+exec_prefix=${prefix}
 libdir=/usr/lib/arm-linux-gnueabihf
 includedir=${prefix}/include
 
@@ -11,5 +11,5 @@ Version: 1.2.15
 Requires:
 Conflicts:
 Libs: -L${libdir} -Wl,-rpath,${libdir} -lSDL  -lpthread
-Libs.private: -lSDL  -lpthread  -lm -ldl -L/opt/vc/lib -lGLESv2 -lEGL -lbcm_host -lvcos -lvchiq_arm -lts -lpthread
+Libs.private: -lSDL  -lpthread  -lm -ldl -L/opt/vc/lib -lGLESv2 -lEGL -lbcm_host -lvcos -lvchiq_arm -lpthread
 Cflags: -I${includedir}/SDL -D_GNU_SOURCE=1 -D_REENTRANT

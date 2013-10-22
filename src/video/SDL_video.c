@@ -601,9 +601,8 @@ SDL_Surface * SDL_SetVideoMode (int width, int height, int bpp, Uint32 flags)
         //pida la aplicación. También se hace en SDL_fbvideo.c. NO se fuerza DOUBLEBUF porque
 	//la idea es que se llame a SDL_UpdateRect(0,0,0,0) si el programador llama a SDL_Flip()
 	//sin activar el flag SDL_DOUBLEBUF. No hacerlo así rompe la API. Es mejor retocar las apps.
-        flags |= SDL_FULLSCREEN;
-        flags |= SDL_HWSURFACE;
-        flags |= SDL_HWPALETTE;
+        //flags |= SDL_FULLSCREEN;
+        if (bpp > 8)
 	
 	#ifdef WIN32
 		sysevents_mouse_pressed = 0;
@@ -654,10 +653,14 @@ SDL_Surface * SDL_SetVideoMode (int width, int height, int bpp, Uint32 flags)
 		flags &= ~SDL_DOUBLEBUF;
 	}
 #endif
-	if ( (flags&SDL_DOUBLEBUF) == SDL_DOUBLEBUF ) {
-		/* Use hardware surfaces when double-buffering */
+	//MAC esto es incorrecto en nuestro caso: vamos a tener doble buffer, y en la memoria de vídeo,
+	//pero antes de eso vamos a usar nuestra superficie en RAM para renderizar la escena entera y
+	//luego nosotros implementamos el doble buffer. Así que tenemos doble buffer, PERO no HWSURFACE.
+
+	/*if ( (flags&SDL_DOUBLEBUF) == SDL_DOUBLEBUF ) {
+		//Use hardware surfaces when double-buffering
 		flags |= SDL_HWSURFACE;
-	}
+	}*/
 
 	is_opengl = ( ( flags & SDL_OPENGL ) == SDL_OPENGL );
 	if ( is_opengl ) {
