@@ -86,6 +86,10 @@ typedef struct {
     DISPMANX_RESOURCE_HANDLE_T  b_resource;
     DISPMANX_ELEMENT_HANDLE_T   b_element;
     DISPMANX_UPDATE_HANDLE_T    b_update;	
+    
+    //Variable para saber si el usuario ha seteado la varable de entorno de ignorar ratio
+    int ignore_ratio;
+
     //Grupo de variables para el vc_tv_service, que se usan para cosas como recuperar el modo gráfico físico,
     //la lista de modos disponibles, establecer nuevo modo físico...No mezclar con dispmanx que es para 
     //elementos visuales. Están en la misma estructura por no definir otra.
@@ -587,8 +591,8 @@ static SDL_Surface *DISPMANX_SetVideoMode(_THIS, SDL_Surface *current,
 	vc_dispmanx_rect_set (&(dispvars->src_rect), 0, 0, 
 	   width << 16, height << 16);	
 
-	int ignore_ratio = SDL_getenv("SDL_DISPMANX_IGNORE_RATIO");
-	if (ignore_ratio)
+	dispvars->ignore_ratio = SDL_getenv("SDL_DISPMANX_IGNORE_RATIO");
+	if (dispvars->ignore_ratio)
 		vc_dispmanx_rect_set( &(dispvars->dst_rect), 0, 0, 
 	   		dispvars->amode.width , dispvars->amode.height );
 	else {
@@ -1199,13 +1203,15 @@ static void DISPMANX_VideoQuit(_THIS)
 	vc_dispmanx_update_submit_sync( dispvars->update );		
 	
 	//----------Quitamos el element y su resource que se usan para el fondo negro.
-	dispvars->b_update = vc_dispmanx_update_start( 0 );
-    	assert( dispvars->b_update );
+	if (!dispvars->ignore_ratio){
+		dispvars->b_update = vc_dispmanx_update_start( 0 );
+    		assert( dispvars->b_update );
     	
-	vc_dispmanx_resource_delete( dispvars->b_resource );
-	vc_dispmanx_element_remove ( dispvars->b_update, dispvars->b_element);
+		vc_dispmanx_resource_delete( dispvars->b_resource );
+		vc_dispmanx_element_remove ( dispvars->b_update, dispvars->b_element);
 	
-	vc_dispmanx_update_submit_sync( dispvars->b_update );		
+		vc_dispmanx_update_submit_sync( dispvars->b_update );
+	}		
 	//----------------------------------------------------------------------------
 	
 	vc_dispmanx_display_close( dispvars->display );
