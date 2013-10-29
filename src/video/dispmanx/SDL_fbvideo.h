@@ -50,14 +50,8 @@ typedef struct vidmem_bucket {
 
 /* Private display data */
 struct SDL_PrivateVideoData {
-	int console_fd;
 	DISPMANX_MODEINFO_T cache_modinfo;
 	DISPMANX_MODEINFO_T saved_modinfo;
-	struct fb_var_screeninfo screen_vinfo;
-	struct fb_var_screeninfo saved_vinfo;
-	struct fb_var_screeninfo cache_vinfo;
-	int saved_cmaplen;
-	__u16 *saved_cmap;
 
 	int current_vt;
 	int saved_vt;
@@ -71,8 +65,6 @@ struct SDL_PrivateVideoData {
 #endif
 
 	char *mapped_mem;
-	char *mapped_mem2;
-	char *shadow_mem;
 	int mapped_memlen;
 	int mapped_offset;
 	char *mapped_io;

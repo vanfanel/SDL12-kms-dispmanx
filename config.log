@@ -67,13 +67,13 @@ configure:3268: gcc -V >&5
 gcc: error: unrecognized option '-V'
 gcc: fatal error: no input files
 compilation terminated.
-distcc[2357] ERROR: compile (null) on localhost failed with exit code 4
+distcc[2678] ERROR: compile (null) on localhost failed with exit code 4
 configure:3279: $? = 4
 configure:3268: gcc -qversion >&5
 gcc: error: unrecognized option '-qversion'
 gcc: fatal error: no input files
 compilation terminated.
-distcc[2363] ERROR: compile (null) on localhost failed with exit code 4
+distcc[2684] ERROR: compile (null) on localhost failed with exit code 4
 configure:3279: $? = 4
 configure:3299: checking whether the C compiler works
 configure:3321: gcc -O3 -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s   conftest.c  >&5
@@ -113,7 +113,7 @@ configure:3781: $? = 0
 configure:3795: gcc -E  conftest.c
 conftest.c:9:28: fatal error: ac_nonexistent.h: No such file or directory
 compilation terminated.
-distcc[2443] ERROR: compile (null) on localhost failed
+distcc[2764] ERROR: compile (null) on localhost failed
 configure:3795: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -131,7 +131,7 @@ configure:3840: $? = 0
 configure:3854: gcc -E  conftest.c
 conftest.c:9:28: fatal error: ac_nonexistent.h: No such file or directory
 compilation terminated.
-distcc[2459] ERROR: compile (null) on localhost failed
+distcc[2780] ERROR: compile (null) on localhost failed
 configure:3854: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -195,7 +195,7 @@ configure:4143: checking minix/config.h usability
 configure:4143: gcc -c -O3 -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s  conftest.c >&5
 conftest.c:52:26: fatal error: minix/config.h: No such file or directory
 compilation terminated.
-distcc[2661] ERROR: compile conftest.c on localhost failed
+distcc[2982] ERROR: compile conftest.c on localhost failed
 configure:4143: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -255,7 +255,7 @@ configure:4143: checking minix/config.h presence
 configure:4143: gcc -E  conftest.c
 conftest.c:19:26: fatal error: minix/config.h: No such file or directory
 compilation terminated.
-distcc[2674] ERROR: compile (null) on localhost failed
+distcc[2995] ERROR: compile (null) on localhost failed
 configure:4143: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -388,7 +388,7 @@ configure:10832: gcc -c -O3 -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm
 conftest.c:27:9: error: unknown type name 'not'
 conftest.c:27:15: error: expected '=', ',', ';', 'asm' or '__attribute__' before 'universal'
 conftest.c:27:15: error: unknown type name 'universal'
-distcc[2979] ERROR: compile conftest.c on localhost failed
+distcc[3300] ERROR: compile conftest.c on localhost failed
 configure:10832: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -427,7 +427,7 @@ configure:10895: gcc -c -O3 -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm
 conftest.c: In function 'main':
 conftest.c:33:4: error: unknown type name 'not'
 conftest.c:33:12: error: expected '=', ',', ';', 'asm' or '__attribute__' before 'endian'
-distcc[2997] ERROR: compile conftest.c on localhost failed
+distcc[3318] ERROR: compile conftest.c on localhost failed
 configure:10895: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -492,13 +492,13 @@ configure:11363: gcc -V >&5
 gcc: error: unrecognized option '-V'
 gcc: fatal error: no input files
 compilation terminated.
-distcc[3017] ERROR: compile (null) on localhost failed with exit code 4
+distcc[3338] ERROR: compile (null) on localhost failed with exit code 4
 configure:11374: $? = 4
 configure:11363: gcc -qversion >&5
 gcc: error: unrecognized option '-qversion'
 gcc: fatal error: no input files
 compilation terminated.
-distcc[3023] ERROR: compile (null) on localhost failed with exit code 4
+distcc[3344] ERROR: compile (null) on localhost failed with exit code 4
 configure:11374: $? = 4
 configure:11378: checking whether we are using the GNU C compiler
 configure:11406: result: yes
@@ -530,13 +530,13 @@ configure:11710: g++ -V >&5
 g++: error: unrecognized option '-V'
 g++: fatal error: no input files
 compilation terminated.
-distcc[3039] ERROR: compile (null) on localhost failed with exit code 4
+distcc[3360] ERROR: compile (null) on localhost failed with exit code 4
 configure:11721: $? = 4
 configure:11710: g++ -qversion >&5
 g++: error: unrecognized option '-qversion'
 g++: fatal error: no input files
 compilation terminated.
-distcc[3045] ERROR: compile (null) on localhost failed with exit code 4
+distcc[3366] ERROR: compile (null) on localhost failed with exit code 4
 configure:11721: $? = 4
 configure:11725: checking whether we are using the GNU C++ compiler
 configure:11744: g++ -c   conftest.cpp >&5
@@ -567,13 +567,13 @@ configure:11968: g++ -V >&5
 g++: error: unrecognized option '-V'
 g++: fatal error: no input files
 compilation terminated.
-distcc[3077] ERROR: compile (null) on localhost failed with exit code 4
+distcc[3398] ERROR: compile (null) on localhost failed with exit code 4
 configure:11979: $? = 4
 configure:11968: g++ -qversion >&5
 g++: error: unrecognized option '-qversion'
 g++: fatal error: no input files
 compilation terminated.
-distcc[3083] ERROR: compile (null) on localhost failed with exit code 4
+distcc[3404] ERROR: compile (null) on localhost failed with exit code 4
 configure:11979: $? = 4
 configure:11983: checking whether we are using the GNU C++ compiler
 configure:12011: result: yes
@@ -585,7 +585,7 @@ configure:12139: $? = 0
 configure:12153: g++ -E  conftest.cpp
 conftest.cpp:27:28: fatal error: ac_nonexistent.h: No such file or directory
 compilation terminated.
-distcc[3102] ERROR: compile (null) on localhost failed
+distcc[3423] ERROR: compile (null) on localhost failed
 configure:12153: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -621,7 +621,7 @@ configure:12198: $? = 0
 configure:12212: g++ -E  conftest.cpp
 conftest.cpp:27:28: fatal error: ac_nonexistent.h: No such file or directory
 compilation terminated.
-distcc[3118] ERROR: compile (null) on localhost failed
+distcc[3439] ERROR: compile (null) on localhost failed
 configure:12212: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -801,7 +801,7 @@ configure:15652: $? = 0
 configure:15652: gcc -c -O3 -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s -I./include -D_GNU_SOURCE=1  -I./include -D_GNU_SOURCE=1 conftest.c >&5
 conftest.c: In function 'main':
 conftest.c:80:21: error: expected expression before ')' token
-distcc[3546] ERROR: compile conftest.c on localhost failed
+distcc[3867] ERROR: compile conftest.c on localhost failed
 configure:15652: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -895,7 +895,7 @@ configure:15664: $? = 0
 configure:15664: gcc -c -O3 -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s -I./include -D_GNU_SOURCE=1  -I./include -D_GNU_SOURCE=1 conftest.c >&5
 conftest.c: In function 'main':
 conftest.c:80:22: error: expected expression before ')' token
-distcc[3565] ERROR: compile conftest.c on localhost failed
+distcc[3886] ERROR: compile conftest.c on localhost failed
 configure:15664: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -1077,10 +1077,10 @@ configure:16081: $? = 0
 configure:16081: result: yes
 configure:16081: checking for strlcpy
 configure:16081: gcc -o conftest -O3 -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s -I./include -D_GNU_SOURCE=1  -I./include -D_GNU_SOURCE=1   conftest.c  >&5
-/tmp/ccutcO9U.o: In function `main':
+/tmp/ccMB0ZIk.o: In function `main':
 conftest.c:(.text.startup+0x4): undefined reference to `strlcpy'
 collect2: ld returned 1 exit status
-distcc[3956] ERROR: compile conftest.c on localhost failed
+distcc[4277] ERROR: compile conftest.c on localhost failed
 configure:16081: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -1187,10 +1187,10 @@ configure: failed program was:
 configure:16081: result: no
 configure:16081: checking for strlcat
 configure:16081: gcc -o conftest -O3 -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s -I./include -D_GNU_SOURCE=1  -I./include -D_GNU_SOURCE=1   conftest.c  >&5
-/tmp/ccYOHVf4.o: In function `main':
+/tmp/cc6Pd0in.o: In function `main':
 conftest.c:(.text.startup+0x4): undefined reference to `strlcat'
 collect2: ld returned 1 exit status
-distcc[3975] ERROR: compile conftest.c on localhost failed
+distcc[4296] ERROR: compile conftest.c on localhost failed
 configure:16081: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -1302,10 +1302,10 @@ configure:16081: $? = 0
 configure:16081: result: yes
 configure:16081: checking for _strrev
 configure:16081: gcc -o conftest -O3 -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s -I./include -D_GNU_SOURCE=1  -I./include -D_GNU_SOURCE=1   conftest.c  >&5
-/tmp/ccGEAnbt.o: In function `main':
+/tmp/ccEwPBhP.o: In function `main':
 conftest.c:(.text.startup+0x4): undefined reference to `_strrev'
 collect2: ld returned 1 exit status
-distcc[4017] ERROR: compile conftest.c on localhost failed
+distcc[4338] ERROR: compile conftest.c on localhost failed
 configure:16081: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -1413,10 +1413,10 @@ configure: failed program was:
 configure:16081: result: no
 configure:16081: checking for _strupr
 configure:16081: gcc -o conftest -O3 -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s -I./include -D_GNU_SOURCE=1  -I./include -D_GNU_SOURCE=1   conftest.c  >&5
-/tmp/cckBdn2x.o: In function `main':
+/tmp/ccqJ5NhS.o: In function `main':
 conftest.c:(.text.startup+0x4): undefined reference to `_strupr'
 collect2: ld returned 1 exit status
-distcc[4036] ERROR: compile conftest.c on localhost failed
+distcc[4357] ERROR: compile conftest.c on localhost failed
 configure:16081: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -1524,10 +1524,10 @@ configure: failed program was:
 configure:16081: result: no
 configure:16081: checking for _strlwr
 configure:16081: gcc -o conftest -O3 -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s -I./include -D_GNU_SOURCE=1  -I./include -D_GNU_SOURCE=1   conftest.c  >&5
-/tmp/ccomf5kT.o: In function `main':
+/tmp/cc8CdJ2g.o: In function `main':
 conftest.c:(.text.startup+0x4): undefined reference to `_strlwr'
 collect2: ld returned 1 exit status
-distcc[4055] ERROR: compile conftest.c on localhost failed
+distcc[4376] ERROR: compile conftest.c on localhost failed
 configure:16081: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -1650,10 +1650,10 @@ configure:16081: $? = 0
 configure:16081: result: yes
 configure:16081: checking for itoa
 configure:16081: gcc -o conftest -O3 -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s -I./include -D_GNU_SOURCE=1  -I./include -D_GNU_SOURCE=1   conftest.c  >&5
-/tmp/ccSKtNMy.o: In function `main':
+/tmp/ccSRRGRX.o: In function `main':
 conftest.c:(.text.startup+0x4): undefined reference to `itoa'
 collect2: ld returned 1 exit status
-distcc[4143] ERROR: compile conftest.c on localhost failed
+distcc[4464] ERROR: compile conftest.c on localhost failed
 configure:16081: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -1764,10 +1764,10 @@ configure: failed program was:
 configure:16081: result: no
 configure:16081: checking for _ltoa
 configure:16081: gcc -o conftest -O3 -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s -I./include -D_GNU_SOURCE=1  -I./include -D_GNU_SOURCE=1   conftest.c  >&5
-/tmp/cc2rez8h.o: In function `main':
+/tmp/ccMDV87i.o: In function `main':
 conftest.c:(.text.startup+0x4): undefined reference to `_ltoa'
 collect2: ld returned 1 exit status
-distcc[4162] ERROR: compile conftest.c on localhost failed
+distcc[4483] ERROR: compile conftest.c on localhost failed
 configure:16081: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -1878,10 +1878,10 @@ configure: failed program was:
 configure:16081: result: no
 configure:16081: checking for _uitoa
 configure:16081: gcc -o conftest -O3 -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s -I./include -D_GNU_SOURCE=1  -I./include -D_GNU_SOURCE=1   conftest.c  >&5
-/tmp/ccCA0vCo.o: In function `main':
+/tmp/ccaM8VDn.o: In function `main':
 conftest.c:(.text.startup+0x4): undefined reference to `_uitoa'
 collect2: ld returned 1 exit status
-distcc[4181] ERROR: compile conftest.c on localhost failed
+distcc[4502] ERROR: compile conftest.c on localhost failed
 configure:16081: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -1992,10 +1992,10 @@ configure: failed program was:
 configure:16081: result: no
 configure:16081: checking for _ultoa
 configure:16081: gcc -o conftest -O3 -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s -I./include -D_GNU_SOURCE=1  -I./include -D_GNU_SOURCE=1   conftest.c  >&5
-/tmp/ccIWVM8J.o: In function `main':
+/tmp/ccw1hhBr.o: In function `main':
 conftest.c:(.text.startup+0x4): undefined reference to `_ultoa'
 collect2: ld returned 1 exit status
-distcc[4200] ERROR: compile conftest.c on localhost failed
+distcc[4521] ERROR: compile conftest.c on localhost failed
 configure:16081: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -2114,10 +2114,10 @@ configure:16081: $? = 0
 configure:16081: result: yes
 configure:16081: checking for _i64toa
 configure:16081: gcc -o conftest -O3 -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s -I./include -D_GNU_SOURCE=1  -I./include -D_GNU_SOURCE=1   conftest.c  >&5
-/tmp/ccEpmzCb.o: In function `main':
+/tmp/ccQROzra.o: In function `main':
 conftest.c:(.text.startup+0x4): undefined reference to `_i64toa'
 collect2: ld returned 1 exit status
-distcc[4259] ERROR: compile conftest.c on localhost failed
+distcc[4580] ERROR: compile conftest.c on localhost failed
 configure:16081: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -2230,10 +2230,10 @@ configure: failed program was:
 configure:16081: result: no
 configure:16081: checking for _ui64toa
 configure:16081: gcc -o conftest -O3 -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s -I./include -D_GNU_SOURCE=1  -I./include -D_GNU_SOURCE=1   conftest.c  >&5
-/tmp/ccjkomsm.o: In function `main':
+/tmp/ccWis2Jd.o: In function `main':
 conftest.c:(.text.startup+0x4): undefined reference to `_ui64toa'
 collect2: ld returned 1 exit status
-distcc[4278] ERROR: compile conftest.c on localhost failed
+distcc[4599] ERROR: compile conftest.c on localhost failed
 configure:16081: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -2372,10 +2372,10 @@ configure:16081: $? = 0
 configure:16081: result: yes
 configure:16081: checking for _stricmp
 configure:16081: gcc -o conftest -O3 -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s -I./include -D_GNU_SOURCE=1  -I./include -D_GNU_SOURCE=1   conftest.c  >&5
-/tmp/ccehJDCA.o: In function `main':
+/tmp/ccyxefOy.o: In function `main':
 conftest.c:(.text.startup+0x4): undefined reference to `_stricmp'
 collect2: ld returned 1 exit status
-distcc[4423] ERROR: compile conftest.c on localhost failed
+distcc[4744] ERROR: compile conftest.c on localhost failed
 configure:16081: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -2499,10 +2499,10 @@ configure:16081: $? = 0
 configure:16081: result: yes
 configure:16081: checking for _strnicmp
 configure:16081: gcc -o conftest -O3 -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s -I./include -D_GNU_SOURCE=1  -I./include -D_GNU_SOURCE=1   conftest.c  >&5
-/tmp/cc4ER6v4.o: In function `main':
+/tmp/ccSEVtt3.o: In function `main':
 conftest.c:(.text.startup+0x4): undefined reference to `_strnicmp'
 collect2: ld returned 1 exit status
-distcc[4465] ERROR: compile conftest.c on localhost failed
+distcc[4786] ERROR: compile conftest.c on localhost failed
 configure:16081: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -2660,7 +2660,7 @@ configure:16091: checking for libiconv_open in -liconv
 configure:16116: gcc -o conftest -O3 -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s -I./include -D_GNU_SOURCE=1  -I./include -D_GNU_SOURCE=1   conftest.c -liconv   >&5
 /usr/bin/ld: cannot find -liconv
 collect2: ld returned 1 exit status
-distcc[4652] ERROR: compile conftest.c on localhost failed
+distcc[4973] ERROR: compile conftest.c on localhost failed
 configure:16116: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -2782,10 +2782,10 @@ configure:21108: $? = 0
 configure:21114: result: yes
 configure:21118: checking for dlopen in -lc
 configure:21143: gcc -o conftest -O3 -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s -I./include -D_GNU_SOURCE=1  -I./include -D_GNU_SOURCE=1   conftest.c -lc   >&5
-/tmp/ccAkaDWY.o: In function `main':
+/tmp/ccIdkE4m.o: In function `main':
 conftest.c:(.text.startup+0x4): undefined reference to `dlopen'
 collect2: ld returned 1 exit status
-distcc[4705] ERROR: compile conftest.c on localhost failed
+distcc[5026] ERROR: compile conftest.c on localhost failed
 configure:21143: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -2900,7 +2900,7 @@ configure:21191: result: yes
 configure:17813: checking for Altivec with GCC altivec.h and -maltivec option
 configure:17832: gcc -c -O3 -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s -I./include -D_GNU_SOURCE=1 -maltivec  -I./include -D_GNU_SOURCE=1 conftest.c >&5
 cc1: error: unrecognized command line option '-maltivec'
-distcc[4731] ERROR: compile conftest.c on localhost failed
+distcc[5052] ERROR: compile conftest.c on localhost failed
 configure:17832: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -3011,7 +3011,7 @@ configure:17839: result: no
 configure:17843: checking for Altivec with GCC -maltivec option
 configure:17861: gcc -c -O3 -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s -I./include -D_GNU_SOURCE=1 -maltivec  -I./include -D_GNU_SOURCE=1 conftest.c >&5
 cc1: error: unrecognized command line option '-maltivec'
-distcc[4742] ERROR: compile conftest.c on localhost failed
+distcc[5063] ERROR: compile conftest.c on localhost failed
 configure:17861: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -3121,7 +3121,7 @@ configure:17867: result: no
 configure:17872: checking for Altivec with GCC altivec.h and -faltivec option
 configure:17893: gcc -c -O3 -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s -I./include -D_GNU_SOURCE=1 -faltivec  -I./include -D_GNU_SOURCE=1 conftest.c >&5
 cc1: error: unrecognized command line option '-faltivec'
-distcc[4753] ERROR: compile conftest.c on localhost failed
+distcc[5074] ERROR: compile conftest.c on localhost failed
 configure:17893: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -3232,7 +3232,7 @@ configure:17900: result: no
 configure:17905: checking for Altivec with GCC -faltivec option
 configure:17923: gcc -c -O3 -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s -I./include -D_GNU_SOURCE=1 -faltivec  -I./include -D_GNU_SOURCE=1 conftest.c >&5
 cc1: error: unrecognized command line option '-faltivec'
-distcc[4764] ERROR: compile conftest.c on localhost failed
+distcc[5085] ERROR: compile conftest.c on localhost failed
 configure:17923: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -3343,7 +3343,7 @@ configure:16876: checking for dmedia audio support
 configure:16894: gcc -c -O3 -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s -I./include -D_GNU_SOURCE=1  -I./include -D_GNU_SOURCE=1 conftest.c >&5
 conftest.c:92:36: fatal error: dmedia/audio.h: No such file or directory
 compilation terminated.
-distcc[4775] ERROR: compile conftest.c on localhost failed
+distcc[5096] ERROR: compile conftest.c on localhost failed
 configure:16894: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -3470,7 +3470,7 @@ configure:19649: checking for PlayStation 2 GS support
 configure:19667: gcc -c -O3 -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s -I./include -D_GNU_SOURCE=1  -I./include -D_GNU_SOURCE=1 conftest.c >&5
 conftest.c:96:36: fatal error: linux/ps2/dev.h: No such file or directory
 compilation terminated.
-distcc[4911] ERROR: compile conftest.c on localhost failed
+distcc[5232] ERROR: compile conftest.c on localhost failed
 configure:19667: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -3584,7 +3584,7 @@ configure:19694: checking for PlayStation 3 Cell support
 configure:19713: gcc -c -O3 -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s -I./include -D_GNU_SOURCE=1  -I./include -D_GNU_SOURCE=1 conftest.c >&5
 conftest.c:97:29: fatal error: asm/ps3fb.h: No such file or directory
 compilation terminated.
-distcc[4925] ERROR: compile conftest.c on localhost failed
+distcc[5246] ERROR: compile conftest.c on localhost failed
 configure:19713: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -3699,7 +3699,7 @@ configure:19788: checking for SVGAlib (1.4.0+) support
 configure:19810: gcc -c -O3 -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s -I./include -D_GNU_SOURCE=1  -I./include -D_GNU_SOURCE=1 conftest.c >&5
 conftest.c:96:26: fatal error: vga.h: No such file or directory
 compilation terminated.
-distcc[4939] ERROR: compile conftest.c on localhost failed
+distcc[5260] ERROR: compile conftest.c on localhost failed
 configure:19810: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -3817,7 +3817,7 @@ configure:19838: checking for libVGL support
 configure:19862: gcc -c -O3 -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s -I./include -D_GNU_SOURCE=1  -I./include -D_GNU_SOURCE=1 conftest.c >&5
 conftest.c:96:31: fatal error: sys/fbio.h: No such file or directory
 compilation terminated.
-distcc[4953] ERROR: compile conftest.c on localhost failed
+distcc[5274] ERROR: compile conftest.c on localhost failed
 configure:19862: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -3937,7 +3937,7 @@ configure:19890: checking for wscons support
 configure:19910: gcc -c -O3 -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s -I./include -D_GNU_SOURCE=1  -I./include -D_GNU_SOURCE=1 conftest.c >&5
 conftest.c:97:42: fatal error: dev/wscons/wsconsio.h: No such file or directory
 compilation terminated.
-distcc[4967] ERROR: compile conftest.c on localhost failed
+distcc[5288] ERROR: compile conftest.c on localhost failed
 configure:19910: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -4057,7 +4057,7 @@ configure:20599: checking for Touchscreen library support
 configure:20616: gcc -c -O3 -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s -I./include -D_GNU_SOURCE=1  -I./include -D_GNU_SOURCE=1 conftest.c >&5
 conftest.c:97:29: fatal error: tslib.h: No such file or directory
 compilation terminated.
-distcc[4989] ERROR: compile conftest.c on localhost failed
+distcc[5310] ERROR: compile conftest.c on localhost failed
 configure:20616: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -4171,7 +4171,7 @@ configure:21319: checking for hid_init in -lusbhid
 configure:21344: gcc -o conftest -O3 -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s -I./include -D_GNU_SOURCE=1  -I./include -D_GNU_SOURCE=1   conftest.c -lusbhid   >&5
 /usr/bin/ld: cannot find -lusbhid
 collect2: ld returned 1 exit status
-distcc[5003] ERROR: compile conftest.c on localhost failed
+distcc[5324] ERROR: compile conftest.c on localhost failed
 configure:21344: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -4289,7 +4289,7 @@ configure:21374: checking usb.h usability
 configure:21374: gcc -c -O3 -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s -I./include -D_GNU_SOURCE=1  -I./include -D_GNU_SOURCE=1 conftest.c >&5
 conftest.c:129:17: fatal error: usb.h: No such file or directory
 compilation terminated.
-distcc[5018] ERROR: compile conftest.c on localhost failed
+distcc[5339] ERROR: compile conftest.c on localhost failed
 configure:21374: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -4426,7 +4426,7 @@ configure:21374: checking usb.h presence
 configure:21374: gcc -E  -I./include -D_GNU_SOURCE=1 conftest.c
 conftest.c:96:17: fatal error: usb.h: No such file or directory
 compilation terminated.
-distcc[5031] ERROR: compile (null) on localhost failed
+distcc[5352] ERROR: compile (null) on localhost failed
 configure:21374: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -4532,7 +4532,7 @@ configure:21380: checking libusb.h usability
 configure:21380: gcc -c -O3 -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s -I./include -D_GNU_SOURCE=1  -I./include -D_GNU_SOURCE=1 conftest.c >&5
 conftest.c:129:20: fatal error: libusb.h: No such file or directory
 compilation terminated.
-distcc[5042] ERROR: compile conftest.c on localhost failed
+distcc[5363] ERROR: compile conftest.c on localhost failed
 configure:21380: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -4669,7 +4669,7 @@ configure:21380: checking libusb.h presence
 configure:21380: gcc -E  -I./include -D_GNU_SOURCE=1 conftest.c
 conftest.c:96:20: fatal error: libusb.h: No such file or directory
 compilation terminated.
-distcc[5055] ERROR: compile (null) on localhost failed
+distcc[5376] ERROR: compile (null) on localhost failed
 configure:21380: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -4775,7 +4775,7 @@ configure:21386: checking for hid_init in -lusb
 configure:21411: gcc -o conftest -O3 -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s -I./include -D_GNU_SOURCE=1  -I./include -D_GNU_SOURCE=1   conftest.c -lusb   >&5
 /usr/bin/ld: cannot find -lusb
 collect2: ld returned 1 exit status
-distcc[5066] ERROR: compile conftest.c on localhost failed
+distcc[5387] ERROR: compile conftest.c on localhost failed
 configure:21411: $? = 1
 configure: failed program was:
 | /* confdefs.h */
@@ -4893,7 +4893,7 @@ configure:21431: checking for usbhid
 configure:21468: gcc -c -O3 -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s -I./include -D_GNU_SOURCE=1   -I./include -D_GNU_SOURCE=1 conftest.c >&5
 conftest.c:105:36: fatal error: dev/usb/usb.h: No such file or directory
 compilation terminated.
-distcc[5081] ERROR: compile conftest.c on localhost failed
+distcc[5402] ERROR: compile conftest.c on localhost failed
 configure:21468: $? = 1
 configure: failed program was:
 | /* confdefs.h */

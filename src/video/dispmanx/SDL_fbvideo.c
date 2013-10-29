@@ -69,7 +69,6 @@ typedef struct {
     DISPMANX_DISPLAY_HANDLE_T   display;
     DISPMANX_MODEINFO_T         amode;
     void                       *pixmem;
-    void		       *shadowmem;
     DISPMANX_UPDATE_HANDLE_T    update;
     DISPMANX_RESOURCE_HANDLE_T  resources[2];
     DISPMANX_ELEMENT_HANDLE_T   element;
@@ -236,7 +235,6 @@ static int DISPMANX_VideoInit(_THIS, SDL_PixelFormat *vformat)
  fp = fopen("SDL_log.txt","w");
 #endif
 	
-	int ret = 0;
 #if !SDL_THREADS_DISABLED
 	/* Create the hardware surface lock mutex */
 	hw_lock = SDL_CreateMutex();
@@ -338,24 +336,14 @@ static int DISPMANX_VideoInit(_THIS, SDL_PixelFormat *vformat)
 		
 	//MAC Abrimos el display dispmanx
 	uint32_t screen = 0;
-	printf("dispmanx: Opening display[%i]...\n", screen );
+	printf("Dispmanx: Opening display %i\n", screen );
         dispvars->display = vc_dispmanx_display_open( screen );
 	
 	//MAC Recuperamos algunos datos de la configuración del buffer actual
 	vc_dispmanx_display_get_info( dispvars->display, &(dispvars->amode));
-	assert(ret == 0);
-	vformat->BitsPerPixel = 16; //Pon lo que quieras.Era para restaurar fb
-	
-	//MAC Para que las funciones GetVideoInfo() devuelvan un SDL_VideoInfo con contenidos.
-	this->info.current_w = dispvars->amode.width;
-        this->info.current_h = dispvars->amode.height;
-        this->info.wm_available = 0;
-        this->info.hw_available = 1;
-	this->info.video_mem = 32768 /1024;
-		
-	printf( "Physical video mode is %d x %d\n", 
+	printf( "Dispmanx: Physical video mode is %d x %d\n", 
 	   dispvars->amode.width, dispvars->amode.height );
-	
+		
 	/* Enable mouse and keyboard support */
 	if ( DISPMANX_OpenKeyboard(this) < 0 ) {
 		DISPMANX_VideoQuit(this);
@@ -457,83 +445,10 @@ static SDL_Surface *DISPMANX_SetVideoMode(_THIS, SDL_Surface *current,
 	      printf ("\nERR - wrong bpp: %d\n",bpp);
 	      return (NULL);
 	}	
-
-	
-	//-------------Bloque de preparación de buffer fbdev para luego poder cambiar la paleta.
-	/*	
-	struct fb_fix_screeninfo finfo;
-        struct fb_var_screeninfo vinfo;
-
-	int i;
-	//MAC Mover esto a condicional de 8bpp
-	DISPMANX_RestorePalette(this);
-	// Set the video mode and get the final screen format
-	if ( ioctl(console_fd, FBIOGET_VSCREENINFO, &vinfo) < 0 ) {
-		SDL_SetError("Couldn't get console screen info");
-		return(NULL);
-	}	
-	vinfo.activate = FB_ACTIVATE_NOW;
-	vinfo.accel_flags = 0;
-	vinfo.bits_per_pixel = bpp;
-	vinfo.xres = width;
-	vinfo.xres_virtual = width;
-	vinfo.yres = height;
-	vinfo.yres_virtual = height;
-	vinfo.xoffset = 0;
-	vinfo.yoffset = 0;
-	vinfo.red.length = vinfo.red.offset = 0;
-	vinfo.green.length = vinfo.green.offset = 0;
-	vinfo.blue.length = vinfo.blue.offset = 0;
-	//Ponemos la resolución mediante el interface fbcon
-	if ( ioctl(console_fd, FBIOPUT_VSCREENINFO, &vinfo) < 0 ) {
-			SDL_SetError("Couldn't set console screen info");
-			return(NULL);
-	}
-	vinfo.transp.length = vinfo.transp.offset = 0;
-	cache_vinfo = vinfo;
-	
-	Rmask = 0;
-	for ( i=0; i<vinfo.red.length; ++i ) {
-		Rmask <<= 1;
-		Rmask |= (0x00000001<<vinfo.red.offset);
-	}
-	Gmask = 0;
-	for ( i=0; i<vinfo.green.length; ++i ) {
-		Gmask <<= 1;
-		Gmask |= (0x00000001<<vinfo.green.offset);
-	}
-	Bmask = 0;
-	for ( i=0; i<vinfo.blue.length; ++i ) {
-		Bmask <<= 1;
-		Bmask |= (0x00000001<<vinfo.blue.offset);
-	}
-	if ( ! SDL_ReallocFormat(current, vinfo.bits_per_pixel,
-	                                  Rmask, Gmask, Bmask, 0) ) {
-		return(NULL);
-	}
-	//Get the fixed information about the console hardware.
-	//This is necessary since finfo.line_length changes.
-	 
-	if ( ioctl(console_fd, FBIOGET_FSCREENINFO, &finfo) < 0 ) {
-		SDL_SetError("Couldn't get console hardware info");
-		return(NULL);
-	}
-
-	// Save hardware palette, if needed 
-	DISPMANX_SavePalette(this, &finfo, &vinfo);
-
-	*/
-	
-	//--------------------------------------------------------------------------------------
-
-    	
+	    	
 	//MAC blah 
 	this->UpdateRects = DISPMANX_DirectUpdate;
 
-	//MAC Establecemos los rects para el escalado
-	//this->offset_x = (dispvars->amode.width - width)/2;
-	//this->offset_y = (dispvars->amode.height - height)/2;
-	
 	printf ("\nUsing internal program mode: %d x %d %d bpp", 
 		width, height, dispvars->bits_per_pixel);	
 
@@ -552,12 +467,27 @@ static SDL_Surface *DISPMANX_SetVideoMode(_THIS, SDL_Surface *current,
 	//para que no quede pegado a la parte izquierda de la pantalla al ser menor que la resolución física, que
 	//obviamente no cambia. 
 	//Queda obsoleto si cambiamos la resolución a una que tenga el mismo ratio que el modo original del juego.
-	float orig_ratio = ((float)width / (float)height); 
-	int dst_width = dispvars->amode.height * orig_ratio;	
-	int dst_ypos  = (dispvars->amode.width - dst_width) / 2; 
-	printf ("\nEl ratio usado va a ser: %d / %d = %f", width, height, orig_ratio);
-	printf ("\nEl tamaño del rect de juego, respetando el ratio original, va a ser: %d x %d \n", 
+	
+	dispvars->ignore_ratio = (int) SDL_getenv("SDL_DISPMANX_IGNORE_RATIO");
+
+	if (dispvars->ignore_ratio)
+		vc_dispmanx_rect_set( &(dispvars->dst_rect), 0, 0, 
+	   		dispvars->amode.width , dispvars->amode.height );
+	else {
+		float orig_ratio = ((float)width / (float)height); 
+		int dst_width = dispvars->amode.height * orig_ratio;	
+		int dst_ypos  = (dispvars->amode.width - dst_width) / 2; 
+		printf ("\nUsing proportion ratio: %d / %d = %f", width, height, orig_ratio);
+		printf ("\nProgram rect, respecting original ratio: %d x %d \n", 
 		dst_width, dispvars->amode.height);
+
+		vc_dispmanx_rect_set( &(dispvars->dst_rect), dst_ypos, 0, 
+	   		dst_width , dispvars->amode.height );
+		//Colocamos fondo negro	
+		blank_background();	
+	}
+
+	
 	//------------------------------------------------------------------------------
 	
 	
@@ -591,16 +521,9 @@ static SDL_Surface *DISPMANX_SetVideoMode(_THIS, SDL_Surface *current,
 	vc_dispmanx_rect_set (&(dispvars->src_rect), 0, 0, 
 	   width << 16, height << 16);	
 
-	dispvars->ignore_ratio = SDL_getenv("SDL_DISPMANX_IGNORE_RATIO");
-	if (dispvars->ignore_ratio)
-		vc_dispmanx_rect_set( &(dispvars->dst_rect), 0, 0, 
-	   		dispvars->amode.width , dispvars->amode.height );
-	else {
-		vc_dispmanx_rect_set( &(dispvars->dst_rect), dst_ypos, 0, 
-	   		dst_width , dispvars->amode.height );
-		//Colocamos fondo negro	
-		blank_background();	
-	}
+
+	
+	
 	//------------------------------------------------------------------------------
 	
 	//MAC Establecemos alpha. Para transparencia descomentar flags con or.
@@ -701,7 +624,6 @@ static SDL_Surface *DISPMANX_SetVideoMode(_THIS, SDL_Surface *current,
 	/* We're done */
 	//MAC Disable graphics 1
 	//Aquí ponemos la terminal en modo gráfico. Ya no se imprimirán más mensajes en la consola a partir de aquí. 
-        printf ("\nDISPMANX_SetVideoMode activating keyboard and exiting");
 	if ( DISPMANX_EnterGraphicsMode(this) < 0 )
         	return(NULL);
 
@@ -1192,7 +1114,6 @@ static void DISPMANX_VideoQuit(_THIS)
 	}
 		
 	//MAC liberamos lo relacionado con dispmanx
-	printf ("\nDeleting dispmanx elements;\n");
 	dispvars->update = vc_dispmanx_update_start( 0 );
     	assert( dispvars->update );
     	

@@ -318,13 +318,25 @@ SDL_Surface *SDL_GetVideoSurface(void)
  */
 const SDL_VideoInfo *SDL_GetVideoInfo(void)
 {
-	const SDL_VideoInfo *info;
+	
+	//Los programas NO deben llaman a GetVideoInfo, porque entonces considerarán que tienen disponible
+	//la resolución actual en la lista de resoluciones disponibles, y eso no es cierto: RECUERDA que
+	//a cada programa se le da la resolución interna más pequeña posible.
+	//Luego nosotros ya nosotros escalamos en el backend de manera totalmente transparente para 
+	//el programa.
+
+	printf ("\nERROR: MAC Dispmanx - the program is calling SDL_GetVideoInfo. That shouldn't happen.\n");
+	
+	return NULL;
+	
+
+	/*const SDL_VideoInfo *info;
 
 	info = NULL;
 	if ( current_video ) {
 		info = &current_video->info;
 	}
-	return(info);
+	return(info);*/
 }
 
 /*
@@ -378,58 +390,12 @@ static Uint8 SDL_closest_depths[4][8] = {
 
 int SDL_VideoModeOK (int width, int height, int bpp, Uint32 flags)
 {
-	int table, b, i;
-	int supported;
-	SDL_PixelFormat format;
-	SDL_Rect **sizes;
-
-	/* Currently 1 and 4 bpp are not supported */
-	if ( bpp < 8 || bpp > 32 ) {
-		return(0);
-	}
-	if ( (width <= 0) || (height <= 0) ) {
-		return(0);
-	}
-
-	/* Search through the list valid of modes */
-	SDL_memset(&format, 0, sizeof(format));
-	supported = 0;
-	table = ((bpp+7)/8)-1;
-	SDL_closest_depths[table][0] = bpp;
-	SDL_closest_depths[table][7] = 0;
-	for ( b = 0; !supported && SDL_closest_depths[table][b]; ++b ) {
-		format.BitsPerPixel = SDL_closest_depths[table][b];
-		sizes = SDL_ListModes(&format, flags);
-		if ( sizes == (SDL_Rect **)0 ) {
-			/* No sizes supported at this bit-depth */
-			continue;
-		} else 
-		if (sizes == (SDL_Rect **)NEGATIVE_ONE) {
-			/* Any size supported at this bit-depth */
-			supported = 1;
-			continue;
-		} else if (current_video->handles_any_size) {
-			/* Driver can center a smaller surface to simulate fullscreen */
-			for ( i=0; sizes[i]; ++i ) {
-				if ((sizes[i]->w >= width) && (sizes[i]->h >= height)) {
-					supported = 1; /* this mode can fit the centered window. */
-					break;
-				}
-			}
-		} else
-		for ( i=0; sizes[i]; ++i ) {
-			if ((sizes[i]->w == width) && (sizes[i]->h == height)) {
-				supported = 1;
-				break;
-			}
-		}
-	}
-	if ( supported ) {
-		--b;
-		return(SDL_closest_depths[table][b]);
-	} else {
-		return(0);
-	}
+	//MAC Siempre que un programa quiera un modo de vídeo, lo tiene. Así nos dice qué modo
+	//de vídeo quiere en SetVideoMode y ya. Total, nnunca vamos a cambiar de modo de vídeo,
+	//solo a escalarlo a pantalla completa de manera transparente a la aplicación.
+	
+	printf ("\n[WARNING] MAC Dispmanx : Program calls VideoModeOK(). Always returning true! \n");
+	return 1;
 }
 
 /*
