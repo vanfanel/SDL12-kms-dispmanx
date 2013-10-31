@@ -1050,7 +1050,7 @@ static int DISPMANX_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *col
 	}
 	
 	#ifdef debug_mode
-		fprintf (fp, "\n[INFO][INFO] SetColors() Función completada con éxito!!\n");
+		fprintf (fp,"\n[INFO][INFO] SetColors() Función completada con éxito!!\n");
 	#endif
 	return(1);
 	*/
