@@ -639,8 +639,9 @@ void SDL_DrawCursorNoLock(SDL_Surface *screen)
 
 void SDL_DrawCursor(SDL_Surface *screen)
 {
+	return;
 	/* Lock the screen if necessary */
-	if ( screen == NULL ) {
+	/*if ( screen == NULL ) {
 		return;
 	}
 	if ( SDL_MUSTLOCK(screen) ) {
@@ -651,7 +652,7 @@ void SDL_DrawCursor(SDL_Surface *screen)
 
 	SDL_DrawCursorNoLock(screen);
 
-	/* Unlock the screen and update if necessary */
+	// Unlock the screen and update if necessary 
 	if ( SDL_MUSTLOCK(screen) ) {
 		SDL_UnlockSurface(screen);
 	}
@@ -663,11 +664,11 @@ void SDL_DrawCursor(SDL_Surface *screen)
 
 		SDL_MouseRect(&area);
 
-		/* This can be called before a video mode is set */
+		// This can be called before a video mode is set
 		if ( video->UpdateRects ) {
 			video->UpdateRects(this, 1, &area);
 		}
-	}
+	}*/
 }
 
 void SDL_EraseCursorNoLock(SDL_Surface *screen)

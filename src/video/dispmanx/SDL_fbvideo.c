@@ -17,7 +17,6 @@
 //MAC includes
 #include <string.h>
 #include <errno.h>
-#include <assert.h>
 #include "bcm_host.h"
 //
 
@@ -46,15 +45,8 @@ static int DISPMANX_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *col
 static void DISPMANX_VideoQuit(_THIS);
 
 /* Hardware surface functions */
-static int DISPMANX_InitHWSurfaces(_THIS, SDL_Surface *screen, char *base, int size);
-static void DISPMANX_FreeHWSurfaces(_THIS);
-static int DISPMANX_AllocHWSurface(_THIS, SDL_Surface *surface);
-static int DISPMANX_LockHWSurface(_THIS, SDL_Surface *surface);
-static void DISPMANX_UnlockHWSurface(_THIS, SDL_Surface *surface);
-static void DISPMANX_FreeHWSurface(_THIS, SDL_Surface *surface);
 static void DISPMANX_WaitVBL(_THIS);
 static void DISPMANX_WaitIdle(_THIS);
-static int DISPMANX_FlipHWSurface(_THIS, SDL_Surface *surface);
 static void DISPMANX_DirectUpdate(_THIS, int numrects, SDL_Rect *rects);
 static void blank_background(void);
 //static int enter_bpp (_THIS, int bpp);
@@ -159,15 +151,10 @@ static SDL_VideoDevice *DISPMANX_CreateDevice(int devindex)
 	this->SetColors = DISPMANX_SetColors;
 	this->UpdateRects = DISPMANX_DirectUpdate;
 	this->VideoQuit = DISPMANX_VideoQuit;
-	this->AllocHWSurface = DISPMANX_AllocHWSurface;
 	this->CheckHWBlit = NULL;
 	this->FillHWRect = NULL;
 	this->SetHWColorKey = NULL;
 	this->SetHWAlpha = NULL;
-	this->LockHWSurface = DISPMANX_LockHWSurface;
-	this->UnlockHWSurface = DISPMANX_UnlockHWSurface;
-	this->FlipHWSurface = DISPMANX_FlipHWSurface;
-	this->FreeHWSurface = DISPMANX_FreeHWSurface;
 	this->SetCaption = NULL;
 	this->SetIcon = NULL;
 	this->IconifyWindow = NULL;
@@ -189,44 +176,7 @@ VideoBootStrap DISPMANX_bootstrap = {
 
 static int DISPMANX_AddMode(_THIS, int index, unsigned int w, unsigned int h, int check_timings)
 {
-	SDL_Rect *mode;
-	int next_mode;
-
-	// Check to see if we already have this mode
-	if ( SDL_nummodes[index] > 0 ) {
-		mode = SDL_modelist[index][SDL_nummodes[index]-1];
-		if ( (mode->w == w) && (mode->h == h) ) {
-			printf("\nWe already have mode %dx%d at %d bytes per pixel\n", w, h, index+1);
-			return(0);
-		}
-	}
-
-	//Set up the new video mode rectangle 
-	mode = (SDL_Rect *)SDL_malloc(sizeof *mode);
-	if ( mode == NULL ) {
-		SDL_OutOfMemory();
-		return(-1);
-	}
-	mode->x = 0;
-	mode->y = 0;
-	mode->w = w;
-	mode->h = h;
-	
-	// Allocate the new list of modes, and fill in the new mode
-	next_mode = SDL_nummodes[index];
-	SDL_modelist[index] = (SDL_Rect **)
-	       SDL_realloc(SDL_modelist[index], (1+next_mode+1)*sizeof(SDL_Rect *));
-	if ( SDL_modelist[index] == NULL ) {
-		SDL_OutOfMemory();
-		SDL_nummodes[index] = 0;
-		SDL_free(mode);
-		return(-1);
-	}
-	SDL_modelist[index][next_mode] = mode;
-	SDL_modelist[index][next_mode+1] = NULL;
-	SDL_nummodes[index]++;
-
-	return(0);
+		return(0);
 }
 
 static int DISPMANX_VideoInit(_THIS, SDL_PixelFormat *vformat)
@@ -244,106 +194,8 @@ static int DISPMANX_VideoInit(_THIS, SDL_PixelFormat *vformat)
 		return(-1);
 	}
 #endif
-	
-	//----------MAC Bloque de inicio del fbdev, que porque luego vamos a cambiar la paleta en modos 8bpp--------
-	//----------Supongo que esto se puede condicionar para que sólo se haga para modos de 8bpp------------------
-	
-	/*
-	const char* SDL_fbdev;
-	struct fb_fix_screeninfo finfo;
-	struct fb_var_screeninfo vinfo;
 
 	
-	SDL_fbdev = SDL_getenv("SDL_FBDEV");
-	if ( SDL_fbdev == NULL ) {
-		SDL_fbdev = "/dev/fb0";
-	}
-	
-	console_fd = open(SDL_fbdev, O_RDWR, 0);
-	if ( console_fd < 0 ) {
-		DISPMANX_VideoQuit(this);
-	}	
-
-	
-	// Get the type of video hardware 
-	if ( ioctl(console_fd, FBIOGET_FSCREENINFO, &finfo) < 0 ) {
-		SDL_SetError("Couldn't get console hardware info");
-		DISPMANX_VideoQuit(this);
-		return(-1);
-	}
-	switch (finfo.type) {
-		case FB_TYPE_PACKED_PIXELS:
-		break;
-		default:
-			SDL_SetError("Unsupported console hardware");
-			DISPMANX_VideoQuit(this);
-			return(-1);
-	}
-	switch (finfo.visual) {
-		case FB_VISUAL_TRUECOLOR:
-		case FB_VISUAL_PSEUDOCOLOR:
-		case FB_VISUAL_STATIC_PSEUDOCOLOR:
-		case FB_VISUAL_DIRECTCOLOR:
-			break;
-		default:
-			SDL_SetError("Unsupported console hardware");
-			DISPMANX_VideoQuit(this);
-			return(-1);
-	}
-
-	// Determine the current screen depth 
-	if ( ioctl(console_fd, FBIOGET_VSCREENINFO, &vinfo) < 0 ) {
-		SDL_SetError("Couldn't get console pixel format");
-		DISPMANX_VideoQuit(this);
-		return(-1);
-	}
-	vformat->BitsPerPixel = vinfo.bits_per_pixel;
-	if ( vformat->BitsPerPixel < 8 ) {
-		// Assuming VGA16, we handle this via a shadow framebuffer 
-		vformat->BitsPerPixel = 8;
-	}
-	for ( i=0; i<vinfo.red.length; ++i ) {
-		vformat->Rmask <<= 1;
-		vformat->Rmask |= (0x00000001<<vinfo.red.offset);
-	}
-	for ( i=0; i<vinfo.green.length; ++i ) {
-		vformat->Gmask <<= 1;
-		vformat->Gmask |= (0x00000001<<vinfo.green.offset);
-	}
-	for ( i=0; i<vinfo.blue.length; ++i ) {
-		vformat->Bmask <<= 1;
-		vformat->Bmask |= (0x00000001<<vinfo.blue.offset);
-	}
-	saved_vinfo = vinfo;
-
-	// Save hardware palette, if needed 
-	DISPMANX_SavePalette(this, &finfo, &vinfo);
-	
-	vinfo.accel_flags = 0;	// Temporarily reserve registers 
-	if (ioctl(console_fd, FBIOPUT_VSCREENINFO, &vinfo) < 0) {
-		SDL_SetError("No se pudo introducir config de fbdev");
-		DISPMANX_VideoQuit(this);
-		return(-1);
-	}
-	*/
-
-	//-----------------------------------------------------------------------------------------------
-
-
-
-	//MAC Inicializamos el SOC
-	bcm_host_init();
-		
-	//MAC Abrimos el display dispmanx
-	uint32_t screen = 0;
-	printf("Dispmanx: Opening display %i\n", screen );
-        dispvars->display = vc_dispmanx_display_open( screen );
-	
-	//MAC Recuperamos algunos datos de la configuración del buffer actual
-	vc_dispmanx_display_get_info( dispvars->display, &(dispvars->amode));
-	printf( "Dispmanx: Physical video mode is %d x %d\n", 
-	   dispvars->amode.width, dispvars->amode.height );
-		
 	/* Enable mouse and keyboard support */
 	if ( DISPMANX_OpenKeyboard(this) < 0 ) {
 		DISPMANX_VideoQuit(this);
@@ -368,7 +220,8 @@ static int DISPMANX_VideoInit(_THIS, SDL_PixelFormat *vformat)
 
 static SDL_Rect **DISPMANX_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags)
 {
-	return(SDL_modelist[((format->BitsPerPixel+7)/8)-1]);
+	//No hay modos gráficos que listar.
+	return(NULL);
 }
 
 static SDL_Surface *DISPMANX_SetVideoMode(_THIS, SDL_Surface *current,
@@ -387,36 +240,38 @@ static SDL_Surface *DISPMANX_SetVideoMode(_THIS, SDL_Surface *current,
 //(el modo en que corre la app internamente) sobre el grande (el modo físico).
 //Otra cosa es la tasa de refresco. Tendrás que usar modos físicos 
 //concretos (config.txt) para ajustarte a 50, 60 o 70 Hz.
-
-
+	
+	//Pongo pixmem a NULL para saber en SDL_Quit() si hay que liberar las cosas de dispmanx o no.
+	dispvars->pixmem = NULL;
+	//Si nos pasan width=0 y height=0, interpreto que el programa no quiere vídeo sino
+	//que sólo necesita entrar en modo gráfico, así que salto allá:
+	if ((width == 0) | (height == 0)) goto go_video_console;	
+	
+	//MAC Inicializamos el SOC
+	bcm_host_init();
+		
+	//MAC Abrimos el display dispmanx
+	uint32_t screen = 0;
+	printf("Dispmanx: Opening display %i\n", screen );
+        dispvars->display = vc_dispmanx_display_open( screen );
+	
+	//MAC Recuperamos algunos datos de la configuración del buffer actual
+	vc_dispmanx_display_get_info( dispvars->display, &(dispvars->amode));
+	printf( "Dispmanx: Physical video mode is %d x %d\n", 
+	   dispvars->amode.width, dispvars->amode.height );
+	
 	//-------Bloque de lista de resoluciones, originalmente en VideoInit--------------
-	/* Limpiamos LAS listas de modos disponibles */
-	int i;
-	for ( i=0; i<NUM_MODELISTS; ++i ) {
-		SDL_nummodes[i] = 0;
-		SDL_modelist[i] = NULL;
-	}	
 	
 	//Para la aplicación SDL, el modo de vídeo disponible 
 	//va a ser siempre el que pida. Se añade el modo que pide la aplicación,
 	//que es el tamaño que tendrán los resources, y listo. 
 
-	for (i = 0; i < NUM_MODELISTS; i++){
-              //Añado cada modo a la lista 0 (8bpp), lista 1 (16), lista 2(24)..
-              //Por eso itero hasta NUM_MODELIST: cada MODELIST es para un bpp.
-              DISPMANX_AddMode(this, i, dispvars->amode.width, 
-	          dispvars->amode.height, 0);
-              printf("Adding video mode: %d x %d - %d bpp\n", width,
-                 height, (i+1)*8);
-        }
 	//---------------------------------------------------------------------------------	
 	
 	Uint32 Rmask;
 	Uint32 Gmask;
 	Uint32 Bmask;
-	char *surfaces_mem; 
-	int surfaces_len;
-		
+	
 	dispvars->bits_per_pixel = bpp;	
 	
 	//MAC Establecemos el pitch en función del bpp deseado	
@@ -521,9 +376,6 @@ static SDL_Surface *DISPMANX_SetVideoMode(_THIS, SDL_Surface *current,
 	vc_dispmanx_rect_set (&(dispvars->src_rect), 0, 0, 
 	   width << 16, height << 16);	
 
-
-	
-	
 	//------------------------------------------------------------------------------
 	
 	//MAC Establecemos alpha. Para transparencia descomentar flags con or.
@@ -539,12 +391,10 @@ static SDL_Surface *DISPMANX_SetVideoMode(_THIS, SDL_Surface *current,
 	dispvars->resources[0] = vc_dispmanx_resource_create( 
 	   dispvars->pix_format, width, height, 
 	   &(dispvars->vc_image_ptr) );
-    	assert (dispvars->resources[0]);
 	
 	dispvars->resources[1] = vc_dispmanx_resource_create( 
 	   dispvars->pix_format, width, height,
 	   &(dispvars->vc_image_ptr) );
-    	assert (dispvars->resources[1]);
 	
 	//Reservo memoria para el array de pixles en RAM 
     	dispvars->pixmem = calloc( 1, dispvars->pitch * height);
@@ -588,7 +438,7 @@ static SDL_Surface *DISPMANX_SetVideoMode(_THIS, SDL_Surface *current,
 	}	
 	if (flags & SDL_HWPALETTE)
 	   current->flags |= SDL_HWPALETTE;	
-
+	
 	current->w = width;
 	current->h = height;
 
@@ -597,16 +447,11 @@ static SDL_Surface *DISPMANX_SetVideoMode(_THIS, SDL_Surface *current,
 	current->pitch  = dispvars->pitch;
 	current->pixels = mapped_mem;
 	
-	/* Set up the information for video surface's pixel memory*/
-	surfaces_mem = (char *)current->pixels +
-		(dispvars->pitch * height);
-	surfaces_len = (mapped_memlen-(surfaces_mem-mapped_mem));
-		
-	DISPMANX_FreeHWSurfaces(this);
-	DISPMANX_InitHWSurfaces(this, current, surfaces_mem, surfaces_len);
+	//DISPMANX_FreeHWSurfaces(this);
+	//DISPMANX_InitHWSurfaces(this, current, surfaces_mem, surfaces_len);
 	
-	this->screen = current;
-	this->screen = NULL;
+	//this->screen = current;
+	//this->screen = NULL;
 
 	//Añadimos el element.
 	dispvars->update = vc_dispmanx_update_start( 0 );
@@ -619,11 +464,10 @@ static SDL_Surface *DISPMANX_SetVideoMode(_THIS, SDL_Surface *current,
 	
 	vc_dispmanx_update_submit_sync( dispvars->update );		
 	
-
-	
 	/* We're done */
 	//MAC Disable graphics 1
 	//Aquí ponemos la terminal en modo gráfico. Ya no se imprimirán más mensajes en la consola a partir de aquí. 
+	go_video_console:
 	if ( DISPMANX_EnterGraphicsMode(this) < 0 )
         	return(NULL);
 
@@ -673,230 +517,38 @@ static void blank_background(void)
   // we create a 1x1 black pixel image that is added to display just behind video
 
   VC_IMAGE_TYPE_T type = VC_IMAGE_RGB565;
-  int             ret;
   uint32_t vc_image_ptr;
   uint16_t image = 0x0000; // black
 
   VC_RECT_T dst_rect, src_rect;
 
   dispvars->b_resource = vc_dispmanx_resource_create( type, 1 /*width*/, 1 /*height*/, &vc_image_ptr );
-  assert( dispvars->b_resource );
 
   vc_dispmanx_rect_set( &dst_rect, 0, 0, 1, 1);
 
-  ret = vc_dispmanx_resource_write_data( dispvars->b_resource, type, sizeof(image), &image, &dst_rect );
-  assert(ret == 0);
+  vc_dispmanx_resource_write_data( dispvars->b_resource, type, sizeof(image), &image, &dst_rect );
 
   vc_dispmanx_rect_set( &src_rect, 0, 0, 1<<16, 1<<16);
   vc_dispmanx_rect_set( &dst_rect, 0, 0, 0, 0);
 
   dispvars->b_update = vc_dispmanx_update_start(0);
-  assert(dispvars->b_update);
 
   dispvars->b_element = vc_dispmanx_element_add(dispvars->b_update, dispvars->display, -1 /*layer*/, &dst_rect, 
 	dispvars->b_resource, &src_rect, DISPMANX_PROTECTION_NONE, NULL, NULL, (DISPMANX_TRANSFORM_T)0 );
-  assert(dispvars->b_element);
   
-  ret = vc_dispmanx_update_submit_sync( dispvars->b_update );
-  assert( ret == 0 );
+  vc_dispmanx_update_submit_sync( dispvars->b_update );
 }
 
 
-static int DISPMANX_InitHWSurfaces(_THIS, SDL_Surface *screen, char *base, int size)
+/*static int DISPMANX_InitHWSurfaces(_THIS, SDL_Surface *screen, char *base, int size)
 {
-	#ifdef debug_mode
-		printf("\n[WARNING WARNING] Estamos en modo DEBUG y se escribirá LOG");
-	#endif	
-
-	vidmem_bucket *bucket;
-
-	surfaces_memtotal = size;
-	surfaces_memleft = size;
-
-	if ( surfaces_memleft > 0 ) {
-		bucket = (vidmem_bucket *)SDL_malloc(sizeof(*bucket));
-		if ( bucket == NULL ) {
-			SDL_OutOfMemory();
-			return(-1);
-		}
-		bucket->prev = &surfaces;
-		bucket->used = 0;
-		bucket->dirty = 0;
-		bucket->base = base;
-		bucket->size = size;
-		bucket->next = NULL;
-	} else {
-		bucket = NULL;
-	}
-
-	surfaces.prev = NULL;
-	surfaces.used = 1;
-	surfaces.dirty = 0;
-	surfaces.base = screen->pixels;
-	surfaces.size = (unsigned int)((long)base - (long)surfaces.base);
-	surfaces.next = bucket;
-	screen->hwdata = (struct private_hwdata *)&surfaces;
+	//MAC Aquí no hay que hacer nada. No tenemos acceso directo a superficies hardware.
 	return(0);
-}
-static void DISPMANX_FreeHWSurfaces(_THIS)
+}*/
+/*static void DISPMANX_FreeHWSurfaces(_THIS)
 {
-	vidmem_bucket *bucket, *freeable;
-
-	bucket = surfaces.next;
-	while ( bucket ) {
-		freeable = bucket;
-		bucket = bucket->next;
-		SDL_free(freeable);
-	}
-	surfaces.next = NULL;
-}
-
-static int DISPMANX_AllocHWSurface(_THIS, SDL_Surface *surface)
-{
-	vidmem_bucket *bucket;
-	int size;
-	int extra;
-
-/* Temporarily, we only allow surfaces the same width as display.
-   Some blitters require the pitch between two hardware surfaces
-   to be the same.  Others have interesting alignment restrictions.
-   Until someone who knows these details looks at the code...
-*/
-if ( surface->pitch > SDL_VideoSurface->pitch ) {
-	SDL_SetError("Surface requested wider than screen");
-	return(-1);
-}
-surface->pitch = SDL_VideoSurface->pitch;
-	size = surface->h * surface->pitch;
-#ifdef FBCON_DEBUG
-	fprintf(stderr, "Allocating bucket of %d bytes\n", size);
-#endif
-
-	/* Quick check for available mem */
-	if ( size > surfaces_memleft ) {
-		SDL_SetError("Not enough video memory");
-		return(-1);
-	}
-
-	/* Search for an empty bucket big enough */
-	for ( bucket=&surfaces; bucket; bucket=bucket->next ) {
-		if ( ! bucket->used && (size <= bucket->size) ) {
-			break;
-		}
-	}
-	if ( bucket == NULL ) {
-		SDL_SetError("Video memory too fragmented");
-		return(-1);
-	}
-
-	/* Create a new bucket for left-over memory */
-	extra = (bucket->size - size);
-	if ( extra ) {
-		vidmem_bucket *newbucket;
-
-#ifdef FBCON_DEBUG
-	fprintf(stderr, "Adding new free bucket of %d bytes\n", extra);
-#endif
-		newbucket = (vidmem_bucket *)SDL_malloc(sizeof(*newbucket));
-		if ( newbucket == NULL ) {
-			SDL_OutOfMemory();
-			return(-1);
-		}
-		newbucket->prev = bucket;
-		newbucket->used = 0;
-		newbucket->base = bucket->base+size;
-		newbucket->size = extra;
-		newbucket->next = bucket->next;
-		if ( bucket->next ) {
-			bucket->next->prev = newbucket;
-		}
-		bucket->next = newbucket;
-	}
-
-	/* Set the current bucket values and return it! */
-	bucket->used = 1;
-	bucket->size = size;
-	bucket->dirty = 0;
-#ifdef FBCON_DEBUG
-	fprintf(stderr, "Allocated %d bytes at %p\n", bucket->size, bucket->base);
-#endif
-	surfaces_memleft -= size;
-	surface->pixels = bucket->base;
-	surface->hwdata = (struct private_hwdata *)bucket;
-	return(0);
-}
-
-static void DISPMANX_FreeHWSurface(_THIS, SDL_Surface *surface)
-{
-	vidmem_bucket *bucket, *freeable;
-
-	/* Look for the bucket in the current list */
-	for ( bucket=&surfaces; bucket; bucket=bucket->next ) {
-		if ( bucket == (vidmem_bucket *)surface->hwdata ) {
-			break;
-		}
-	}
-	if ( bucket && bucket->used ) {
-		/* Add the memory back to the total */
-#ifdef DGA_DEBUG
-	printf("Freeing bucket of %d bytes\n", bucket->size);
-#endif
-		surfaces_memleft += bucket->size;
-
-		/* Can we merge the space with surrounding buckets? */
-		bucket->used = 0;
-		if ( bucket->next && ! bucket->next->used ) {
-#ifdef DGA_DEBUG
-	printf("Merging with next bucket, for %d total bytes\n", bucket->size+bucket->next->size);
-#endif
-			freeable = bucket->next;
-			bucket->size += bucket->next->size;
-			bucket->next = bucket->next->next;
-			if ( bucket->next ) {
-				bucket->next->prev = bucket;
-			}
-			SDL_free(freeable);
-		}
-		if ( bucket->prev && ! bucket->prev->used ) {
-#ifdef DGA_DEBUG
-	printf("Merging with previous bucket, for %d total bytes\n", bucket->prev->size+bucket->size);
-#endif
-			freeable = bucket;
-			bucket->prev->size += bucket->size;
-			bucket->prev->next = bucket->next;
-			if ( bucket->next ) {
-				bucket->next->prev = bucket->prev;
-			}
-			SDL_free(freeable);
-		}
-	}
-	surface->pixels = NULL;
-	surface->hwdata = NULL;
-}
-
-static int DISPMANX_LockHWSurface(_THIS, SDL_Surface *surface)
-{
-	if ( switched_away ) {
-		return -2; /* no hardware access */
-	}
-	if ( surface == this->screen ) {
-		SDL_mutexP(hw_lock);
-		if ( DISPMANX_IsSurfaceBusy(surface) ) {
-			DISPMANX_WaitBusySurfaces(this);
-		}
-	} else {
-		if ( DISPMANX_IsSurfaceBusy(surface) ) {
-			DISPMANX_WaitBusySurfaces(this);
-		}
-	}
-	return(0);
-}
-static void DISPMANX_UnlockHWSurface(_THIS, SDL_Surface *surface)
-{
-	if ( surface == this->screen ) {
-		SDL_mutexV(hw_lock);
-	}
-}
+	return;
+}*/
 
 static void DISPMANX_WaitVBL(_THIS)
 {
@@ -909,21 +561,6 @@ static void DISPMANX_WaitVBL(_THIS)
 static void DISPMANX_WaitIdle(_THIS)
 {
 	return;
-}
-
-static int DISPMANX_FlipHWSurface(_THIS, SDL_Surface *surface)
-{
-	
-	//MAC Aquí no hay que entrar para nada porque para la aplicación nosotros no tenemos
-	//double buffer, sino que ella actualiza directamente el único buffer que conoce, en RAM
-	//usando UpdateRects() que es lo que se llama en SDL_Flip() cuando no hay double buffer y
-	//luego nosotros sí que tenemos nuestro doble buffer a base de resources de dispmanx, pero
-	//para la app eso es transparente.  
-	/*#ifdef debug_mode
-		fprintf (fp,"\n[DEBUG] Entrando en FlipHWSurface");
-	#endif*/
-	
-	return (0);
 }
 
 #define BLOCKSIZE_W 32
@@ -1100,9 +737,6 @@ static void DISPMANX_VideoQuit(_THIS)
 		}
 	}
 
-	/* Clean up the memory bucket list */
-	DISPMANX_FreeHWSurfaces(this);
-
 	/* Unmap the video framebuffer and I/O registers */
 	if ( mapped_mem ) {
 		munmap(mapped_mem, mapped_memlen);
@@ -1113,31 +747,32 @@ static void DISPMANX_VideoQuit(_THIS)
 		mapped_io = NULL;
 	}
 		
-	//MAC liberamos lo relacionado con dispmanx
-	dispvars->update = vc_dispmanx_update_start( 0 );
-    	assert( dispvars->update );
+	if (dispvars->pixmem != NULL) {
+	   
+	   //MAC liberamos lo relacionado con dispmanx
+	   dispvars->update = vc_dispmanx_update_start( 0 );
     	
-    	vc_dispmanx_resource_delete( dispvars->resources[0] );
-    	vc_dispmanx_resource_delete( dispvars->resources[1] );
-	vc_dispmanx_element_remove(dispvars->update, dispvars->element);
+    	   vc_dispmanx_resource_delete( dispvars->resources[0] );
+    	   vc_dispmanx_resource_delete( dispvars->resources[1] );
+	   vc_dispmanx_element_remove(dispvars->update, dispvars->element);
 	
-	vc_dispmanx_update_submit_sync( dispvars->update );		
+	   vc_dispmanx_update_submit_sync( dispvars->update );		
 	
-	//----------Quitamos el element y su resource que se usan para el fondo negro.
-	if (!dispvars->ignore_ratio){
+	   //----------Quitamos el element y su resource que se usan para el fondo negro.
+	   if (!dispvars->ignore_ratio){
 		dispvars->b_update = vc_dispmanx_update_start( 0 );
-    		assert( dispvars->b_update );
     	
 		vc_dispmanx_resource_delete( dispvars->b_resource );
 		vc_dispmanx_element_remove ( dispvars->b_update, dispvars->b_element);
 	
 		vc_dispmanx_update_submit_sync( dispvars->b_update );
-	}		
-	//----------------------------------------------------------------------------
+	   }		
+	   //----------------------------------------------------------------------------
 	
-	vc_dispmanx_display_close( dispvars->display );
-	bcm_host_deinit();
-
+	   vc_dispmanx_display_close( dispvars->display );
+ 	   bcm_host_deinit();
+	}
+	
 	DISPMANX_CloseMouse(this);
 	DISPMANX_CloseKeyboard(this);
 	
