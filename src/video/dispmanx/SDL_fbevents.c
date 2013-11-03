@@ -738,7 +738,6 @@ static void handle_mouse(_THIS)
 	int button = 0;
 	int dx = 0, dy = 0;
 	int packetsize = 0;
-	int realx, realy;
 	
 	/* Figure out the mouse packet size */
 	switch (mouse_drv) {
@@ -946,7 +945,6 @@ static void switch_vt(_THIS, unsigned short which)
 	switch_vt_prep(this);
 	if ( ioctl(keyboard_fd, VT_ACTIVATE, which) == 0 ) {
 		ioctl(keyboard_fd, VT_WAITACTIVE, which);
-		switched_away = 1;
 	} else {
 		switch_vt_done(this);
 	}
@@ -1006,18 +1004,6 @@ void DISPMANX_PumpEvents(_THIS)
 	static struct timeval zero;
 
 	do {
-		if ( switched_away ) {
-			struct vt_stat vtstate;
-
-			SDL_mutexP(hw_lock);
-			if ( (ioctl(keyboard_fd, VT_GETSTATE, &vtstate) == 0) &&
-			     vtstate.v_active == current_vt ) {
-				switched_away = 0;
-				switch_vt_done(this);
-			}
-			SDL_mutexV(hw_lock);
-		}
-
 		posted = 0;
 
 		FD_ZERO(&fdset);

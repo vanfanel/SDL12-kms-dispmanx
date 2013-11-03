@@ -63,27 +63,14 @@ struct SDL_PrivateVideoData {
 #if SDL_INPUT_TSLIB
 	struct tsdev *ts_dev;
 #endif
-
-	char *mapped_mem;
-	int mapped_memlen;
-	int mapped_offset;
-	char *mapped_io;
-	long mapped_iolen;
-	int rotate;
-	int shadow_fb;
 	DISPMANX_bitBlit *blitFunc;
 	int physlinebytes; /* Length of a line in bytes in physical fb */
-
-#define NUM_MODELISTS	4		/* 8, 16, 24, and 32 bits-per-pixel */
-	int SDL_nummodes[NUM_MODELISTS];
-	SDL_Rect **SDL_modelist[NUM_MODELISTS];
 
 	vidmem_bucket surfaces;
 	int surfaces_memtotal;
 	int surfaces_memleft;
 
 	SDL_mutex *hw_lock;
-	int switched_away;
 	Uint32 screen_arealen;
 	Uint8 *screen_contents;
 	__u16  screen_palette[3*256];
@@ -109,15 +96,6 @@ struct SDL_PrivateVideoData {
 #define cache_vinfo             (this->hidden->cache_vinfo)
 #define saved_cmaplen		(this->hidden->saved_cmaplen)
 #define saved_cmap		(this->hidden->saved_cmap)
-#define mapped_mem		(this->hidden->mapped_mem)
-#define mapped_mem2             (this->hidden->mapped_mem2)
-#define shadow_mem		(this->hidden->shadow_mem)
-#define mapped_memlen		(this->hidden->mapped_memlen)
-#define mapped_offset		(this->hidden->mapped_offset)
-#define mapped_io		(this->hidden->mapped_io)
-#define mapped_iolen		(this->hidden->mapped_iolen)
-#define rotate			(this->hidden->rotate)
-#define shadow_fb		(this->hidden->shadow_fb)
 #define blitFunc		(this->hidden->blitFunc)
 #define physlinebytes		(this->hidden->physlinebytes)
 #define SDL_nummodes		(this->hidden->SDL_nummodes)
@@ -160,16 +138,6 @@ static __inline__ void DISPMANX_WaitBusySurfaces(_THIS)
 	/* Clear all surface dirty bits */
 	for ( bucket=&surfaces; bucket; bucket=bucket->next ) {
 		bucket->dirty = 0;
-	}
-}
-
-static __inline__ void DISPMANX_dst_to_xy(_THIS, SDL_Surface *dst, int *x, int *y)
-{
-	*x = (long)((char *)dst->pixels - mapped_mem)%this->screen->pitch;
-	*y = (long)((char *)dst->pixels - mapped_mem)/this->screen->pitch;
-	if ( dst == this->screen ) {
-		*x += this->offset_x;
-		*y += this->offset_y;
 	}
 }
 

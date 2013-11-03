@@ -340,29 +340,6 @@ const SDL_VideoInfo *SDL_GetVideoInfo(void)
 }
 
 /*
- * Return a pointer to an array of available screen dimensions for the
- * given format, sorted largest to smallest.  Returns NULL if there are
- * no dimensions available for a particular format, or (SDL_Rect **)-1
- * if any dimension is okay for the given format.  If 'format' is NULL,
- * the mode list will be for the format given by SDL_GetVideoInfo()->vfmt
- */
-SDL_Rect ** SDL_ListModes (SDL_PixelFormat *format, Uint32 flags)
-{
-	SDL_VideoDevice *video = current_video;
-	SDL_VideoDevice *this  = current_video;
-	SDL_Rect **modes;
-
-	modes = NULL;
-	if ( SDL_VideoSurface ) {
-		if ( format == NULL ) {
-			format = SDL_VideoSurface->format;
-		}
-		modes = video->ListModes(this, format, flags);
-	}
-	return(modes);
-}
-
-/*
  * Check to see if a particular video mode is supported.
  * It returns 0 if the requested mode is not supported under any bit depth,
  * or returns the bits-per-pixel of the closest available mode with the
@@ -370,17 +347,6 @@ SDL_Rect ** SDL_ListModes (SDL_PixelFormat *format, Uint32 flags)
  * one used when setting the video mode, SDL_SetVideoMode() will succeed,
  * but will emulate the requested bits-per-pixel with a shadow surface.
  */
-static Uint8 SDL_closest_depths[4][8] = {
-	/* 8 bit closest depth ordering */
-	{ 0, 8, 16, 15, 32, 24, 0, 0 },
-	/* 15,16 bit closest depth ordering */
-	{ 0, 16, 15, 32, 24, 8, 0, 0 },
-	/* 24 bit closest depth ordering */
-	{ 0, 24, 32, 16, 15, 8, 0, 0 },
-	/* 32 bit closest depth ordering */
-	{ 0, 32, 16, 15, 24, 8, 0, 0 }
-};
-
 
 #ifdef __MACOS__ /* MPW optimization bug? */
 #define NEGATIVE_ONE 0xFFFFFFFF
@@ -597,28 +563,10 @@ SDL_Surface * SDL_SetVideoMode (int width, int height, int bpp, Uint32 flags)
 		bpp = SDL_VideoSurface->format->BitsPerPixel;
 	}
 
-	/* Get a good video mode, the closest one possible */
-	//MAC Esto no hace falta
-	//video_w = width;
-	//video_h = height;
 	video_bpp = bpp;
-	//MAC Esto no hace falta. El modo de aplicación siempre está disponible
-	//y luego se escala al modo físico.
-	/*if ( ! SDL_GetVideoMode(&video_w, &video_h, &video_bpp, flags) ) {
-		return(NULL);
-	}*/
-
-	/* Check the requested flags */
-	/* There's no palette in > 8 bits-per-pixel mode */
 	if ( video_bpp > 8 ) {
 		flags &= ~SDL_HWPALETTE;
 	}
-#if 0
-	if ( (flags&SDL_FULLSCREEN) != SDL_FULLSCREEN ) {
-		/* There's no windowed double-buffering */
-		flags &= ~SDL_DOUBLEBUF;
-	}
-#endif
 	//MAC esto es incorrecto en nuestro caso: vamos a tener doble buffer, y en la memoria de vídeo,
 	//pero antes de eso vamos a usar nuestra superficie en RAM para renderizar la escena entera y
 	//luego nosotros implementamos el doble buffer. Así que tenemos doble buffer, PERO no HWSURFACE.
@@ -1026,7 +974,6 @@ void SDL_UpdateRect(SDL_Surface *screen, Sint32 x, Sint32 y, Uint32 w, Uint32 h)
 }
 void SDL_UpdateRects (SDL_Surface *screen, int numrects, SDL_Rect *rects)
 {
-	int i;
 	SDL_VideoDevice *video = current_video;
 	SDL_VideoDevice *this = current_video;
 
@@ -1034,58 +981,8 @@ void SDL_UpdateRects (SDL_Surface *screen, int numrects, SDL_Rect *rects)
 		SDL_SetError("OpenGL active, use SDL_GL_SwapBuffers()");
 		return;
 	}
-	if ( screen == SDL_ShadowSurface ) {
-		/* Blit the shadow surface using saved mapping */
-		SDL_Palette *pal = screen->format->palette;
-		SDL_Color *saved_colors = NULL;
-		if ( pal && !(SDL_VideoSurface->flags & SDL_HWPALETTE) ) {
-			/* simulated 8bpp, use correct physical palette */
-			saved_colors = pal->colors;
-			if ( video->gammacols ) {
-				/* gamma-corrected palette */
-				pal->colors = video->gammacols;
-			} else if ( video->physpal ) {
-				/* physical palette different from logical */
-				pal->colors = video->physpal->colors;
-			}
-		}
-		if ( SHOULD_DRAWCURSOR(SDL_cursorstate) ) {
-			SDL_LockCursor();
-			SDL_DrawCursor(SDL_ShadowSurface);
-			for ( i=0; i<numrects; ++i ) {
-				SDL_LowerBlit(SDL_ShadowSurface, &rects[i], 
-						SDL_VideoSurface, &rects[i]);
-			}
-			SDL_EraseCursor(SDL_ShadowSurface);
-			SDL_UnlockCursor();
-		} else {
-			for ( i=0; i<numrects; ++i ) {
-				SDL_LowerBlit(SDL_ShadowSurface, &rects[i], 
-						SDL_VideoSurface, &rects[i]);
-			}
-		}
-		if ( saved_colors ) {
-			pal->colors = saved_colors;
-		}
-
-		/* Fall through to video surface update */
-		screen = SDL_VideoSurface;
-	}
 	if ( screen == SDL_VideoSurface ) {
-		/* Update the video surface */
-		if ( screen->offset ) {
-			for ( i=0; i<numrects; ++i ) {
-				rects[i].x += video->offset_x;
-				rects[i].y += video->offset_y;
-			}
-			video->UpdateRects(this, numrects, rects);
-			for ( i=0; i<numrects; ++i ) {
-				rects[i].x -= video->offset_x;
-				rects[i].y -= video->offset_y;
-			}
-		} else {
-			video->UpdateRects(this, numrects, rects);
-		}
+		video->UpdateRects(this, numrects, rects);
 	}
 }
 
@@ -1095,45 +992,7 @@ void SDL_UpdateRects (SDL_Surface *screen, int numrects, SDL_Rect *rects)
 int SDL_Flip(SDL_Surface *screen)
 {
 	SDL_VideoDevice *video = current_video;
-	/* Copy the shadow surface to the video surface */
-	if ( screen == SDL_ShadowSurface ) {
-		SDL_Rect rect;
-		SDL_Palette *pal = screen->format->palette;
-		SDL_Color *saved_colors = NULL;
-		if ( pal && !(SDL_VideoSurface->flags & SDL_HWPALETTE) ) {
-			/* simulated 8bpp, use correct physical palette */
-			saved_colors = pal->colors;
-			if ( video->gammacols ) {
-				/* gamma-corrected palette */
-				pal->colors = video->gammacols;
-			} else if ( video->physpal ) {
-				/* physical palette different from logical */
-				pal->colors = video->physpal->colors;
-			}
-		}
 
-		rect.x = 0;
-		rect.y = 0;
-		rect.w = screen->w;
-		rect.h = screen->h;
-		if ( SHOULD_DRAWCURSOR(SDL_cursorstate) ) {
-			SDL_LockCursor();
-			SDL_DrawCursor(SDL_ShadowSurface);
-			SDL_LowerBlit(SDL_ShadowSurface, &rect,
-					SDL_VideoSurface, &rect);
-			SDL_EraseCursor(SDL_ShadowSurface);
-			SDL_UnlockCursor();
-		} else {
-			SDL_LowerBlit(SDL_ShadowSurface, &rect,
-					SDL_VideoSurface, &rect);
-		}
-		if ( saved_colors ) {
-			pal->colors = saved_colors;
-		}
-
-		/* Fall through to video surface update */
-		screen = SDL_VideoSurface;
-	}
 	if ( (screen->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF ) {
 		SDL_VideoDevice *this  = current_video;
 		return(video->FlipHWSurface(this, SDL_VideoSurface));

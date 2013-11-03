@@ -174,11 +174,6 @@ VideoBootStrap DISPMANX_bootstrap = {
 	DISPMANX_Available, DISPMANX_CreateDevice
 };
 
-static int DISPMANX_AddMode(_THIS, int index, unsigned int w, unsigned int h, int check_timings)
-{
-		return(0);
-}
-
 static int DISPMANX_VideoInit(_THIS, SDL_PixelFormat *vformat)
 {
 #ifdef debug_mode
@@ -413,7 +408,6 @@ static SDL_Surface *DISPMANX_SetVideoMode(_THIS, SDL_Surface *current,
 	}
 	
 	//Preparamos SDL para trabajar sobre el nuevo framebuffer
-	shadow_fb = 0;
 
 	//No queremos HWSURFACEs por la manera en que funciona nuestro backend, ya que la app sólo
 	//debe conocer el buffer en RAM para que las actualizaciones no sean bloqueantes.
@@ -442,10 +436,8 @@ static SDL_Surface *DISPMANX_SetVideoMode(_THIS, SDL_Surface *current,
 	current->w = width;
 	current->h = height;
 
-	mapped_mem    = dispvars->pixmem;
-	mapped_memlen =  (dispvars->pitch * height); 
 	current->pitch  = dispvars->pitch;
-	current->pixels = mapped_mem;
+	current->pixels = dispvars->pixmem;
 	
 	//DISPMANX_FreeHWSurfaces(this);
 	//DISPMANX_InitHWSurfaces(this, current, surfaces_mem, surfaces_len);
@@ -695,60 +687,15 @@ static int DISPMANX_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *col
 
 static void DISPMANX_VideoQuit(_THIS)
 {
-	int i,j;
-		
-	if ( this->screen ) {
-	   /* Clear screen and tell SDL not to free the pixels */
-	   const char *dontClearPixels = SDL_getenv("SDL_FBCON_DONT_CLEAR");
-	      //En este caso sí tenemos que limpiar el framebuffer	
-	      if ( !dontClearPixels && this->screen->pixels 
-	      && DISPMANX_InGraphicsMode(this) ) {
-#if defined(__powerpc__) || defined(__ia64__)	
-	         /* SIGBUS when using SDL_memset() ?? */
-		 Uint8 *rowp = (Uint8 *)this->screen->pixels;
-		 int left = this->screen->pitch*this->screen->h;
-		 while ( left-- ) { *rowp++ = 0; }
-#else
-		 SDL_memset(this->screen->pixels,0,
-		 this->screen->h*this->screen->pitch);
-#endif
-	      }
-		
-	      if ( ((char *)this->screen->pixels >= mapped_mem) &&
-	         ( (char *)this->screen->pixels < (mapped_mem+mapped_memlen)) ) 
-		    this->screen->pixels = NULL;
-		 
-	}
-	
 	/* Clear the lock mutex */
 	if ( hw_lock ) {
 		SDL_DestroyMutex(hw_lock);
 		hw_lock = NULL;
 	}
 
-	/* Clean up defined video modes */
-	for ( i=0; i<NUM_MODELISTS; ++i ) {
-		if ( SDL_modelist[i] != NULL ) {
-			for ( j=0; SDL_modelist[i][j]; ++j ) {
-				SDL_free(SDL_modelist[i][j]);
-			}
-			SDL_free(SDL_modelist[i]);
-			SDL_modelist[i] = NULL;
-		}
-	}
-
-	/* Unmap the video framebuffer and I/O registers */
-	if ( mapped_mem ) {
-		munmap(mapped_mem, mapped_memlen);
-		mapped_mem = NULL;
-	}
-	if ( mapped_io ) {
-		munmap(mapped_io, mapped_iolen);
-		mapped_io = NULL;
-	}
-		
 	if (dispvars->pixmem != NULL) {
-	   
+	   free (dispvars->pixmem);
+	      
 	   //MAC liberamos lo relacionado con dispmanx
 	   dispvars->update = vc_dispmanx_update_start( 0 );
     	
