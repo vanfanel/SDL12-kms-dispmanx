@@ -739,6 +739,5 @@ static void DISPMANX_VideoQuit(_THIS)
 	#ifdef debug_mode
 		fclose (fp);
 	#endif
-	
 	exit (0);
 }
