@@ -116,7 +116,7 @@ static SDL_VideoDevice *DISPMANX_CreateDevice(int devindex)
 	//sólo inicializa la memoria interna de lo que en SDL es una
 	//abstracción del dispositivo.
 	#ifdef debug_mode
-		printf ("\n[DEBUG][DEBUG] Esperando pulsación de tecla para gdb remoto...");
+		printf ("\n[DEBUG] Esperando pulsación de tecla para gdb remoto...");
 		getchar();
 	#endif
 
