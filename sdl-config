@@ -3,7 +3,7 @@
 prefix=/usr/local
 exec_prefix=${prefix}
 exec_prefix_set=no
-libdir=/usr/lib/arm-linux-gnueabihf
+libdir=/usr/local/lib
 
 #usage="\
 #Usage: sdl-config [--prefix[=DIR]] [--exec-prefix[=DIR]] [--version] [--cflags] [--libs]"
@@ -45,11 +45,11 @@ while test $# -gt 0; do
       echo -I${prefix}/include/SDL -D_GNU_SOURCE=1 -D_REENTRANT
       ;;
     --libs)
-      echo -L/usr/lib/arm-linux-gnueabihf -Wl,-rpath,${libdir} -lSDL  -lpthread
+      echo -L/usr/local/lib -Wl,-rpath,${libdir} -lSDL  -lpthread
       ;;
     --static-libs)
 #    --libs|--static-libs)
-      echo -L/usr/lib/arm-linux-gnueabihf -Wl,-rpath,${libdir} -lSDL  -lpthread  -lm -ldl -L/opt/vc/lib -lGLESv2 -lEGL -lbcm_host -lvcos -lvchiq_arm -lpthread
+      echo -L/usr/local/lib -Wl,-rpath,${libdir} -lSDL  -lpthread  -lm -ldl -L/opt/vc/lib -lGLESv2 -lEGL -lbcm_host -lvcos -lvchiq_arm -lpthread
       ;;
     *)
       echo "${usage}" 1>&2

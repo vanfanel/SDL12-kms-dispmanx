@@ -2,7 +2,7 @@
 
 prefix=/usr/local
 exec_prefix=${prefix}
-libdir=/usr/lib/arm-linux-gnueabihf
+libdir=/usr/local/lib
 includedir=${prefix}/include
 
 Name: sdl

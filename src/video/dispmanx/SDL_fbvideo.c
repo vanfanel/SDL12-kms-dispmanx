@@ -17,13 +17,13 @@
 //MAC includes
 #include <string.h>
 #include <errno.h>
-#include "bcm_host.h"
+#include <bcm_host.h>
 //
 
 #ifndef HAVE_GETPAGESIZE
 #include <asm/page.h>		/* For definition of PAGE_SIZE */
 #endif
-//#define ALIGN_UP(x,y)  ((x + (y)-1) & ~((y)-1))
+
 #include <linux/vt.h>
 
 #include "SDL_video.h"
@@ -36,6 +36,7 @@
 #include "SDL_fbevents_c.h"
 
 #define min(a,b) ((a)<(b)?(a):(b))
+#define RGB565(r,g,b) (((r)>>3)<<11 | ((g)>>2)<<5 | (b)>>3)
 
 /* Initialization/Query functions */
 static int DISPMANX_VideoInit(_THIS, SDL_PixelFormat *vformat);
@@ -270,9 +271,6 @@ static SDL_Surface *DISPMANX_SetVideoMode(_THIS, SDL_Surface *current,
 	switch (bpp){
 	   case 8:
 		dispvars->pix_format = VC_IMAGE_8BPP;	       
-		//dispvars->pix_format = VC_IMAGE_XRGB8888;	       
-		//Reservamos 4 bytes por pixel (32 bits por pixel)
-		//dispvars->shadowmem = calloc(1, dispvars->pitch * 4 * height);
 		break;
 	   
 	   case 16:
@@ -284,7 +282,7 @@ static SDL_Surface *DISPMANX_SetVideoMode(_THIS, SDL_Surface *current,
 	        break;
            
            default:
-	      printf ("\nERR - wrong bpp: %d\n",bpp);
+	      printf ("\n[ERROR] - wrong bpp: %d\n",bpp);
 	      return (NULL);
 	}	
 	    	
@@ -627,54 +625,20 @@ static void DISPMANX_DirectUpdate(_THIS, int numrects, SDL_Rect *rects)
 
 static int DISPMANX_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 {
-	//Esta función está deshabilitada porque de momento no hemos logrado cambiar la paleta física de los
-	//resources de dispmanx. Si optas por soportar conversión de 8bpp a 32bpp (en DirectUpdate8bpp)
-	//deberás activar al menos la asignación de shadowpal a colors, para tener la paleta que establezca el juego.
-	//dispvars->shadowpal = colors;
-	return (1);	
-/*
 	int i;
-	__u16 r[256];
-	__u16 g[256];
-	__u16 b[256];
-	struct fb_cmap cmap;
+	static unsigned short pal[256];
 	
 	//Set up the colormap
 	for (i = 0; i < ncolors; i++) {
-		r[i] = colors[i].r << 8;
-		g[i] = colors[i].g << 8;
-		b[i] = colors[i].b << 8;
+		pal[i] = RGB565 ((colors[i]).r, (colors[i]).g, (colors[i]).b);
 	}
-	cmap.start = firstcolor;
-	cmap.len = ncolors;
-	cmap.red = r;
-	cmap.green = g;
-	cmap.blue = b;
-	cmap.transp = NULL;
-	int ret = ioctl(console_fd, FBIOPUTCMAP, &cmap);
-	if( (ret < 0) | !(this->screen->flags & SDL_HWPALETTE) ) {
-	        colors = this->screen->format->palette->colors;
-		ncolors = this->screen->format->palette->ncolors;
-		cmap.start = 0;
-		cmap.len = ncolors;
-		SDL_memset(r, 0, sizeof(r));
-		SDL_memset(g, 0, sizeof(g));
-		SDL_memset(b, 0, sizeof(b));
-		if ( ioctl(console_fd, FBIOGETCMAP, &cmap) == 0 ) {
-			for ( i=ncolors-1; i>=0; --i ) {
-				colors[i].r = (r[i]>>8);
-				colors[i].g = (g[i]>>8);
-				colors[i].b = (b[i]>>8);
-			}
-		}
-		return(0);
-	}
-	
+	vc_dispmanx_resource_set_palette(  dispvars->resources[flip_page], pal, 0, sizeof pal );
+	vc_dispmanx_resource_set_palette(  dispvars->resources[!flip_page], pal, 0, sizeof pal );
+
 	#ifdef debug_mode
 		fprintf (fp,"\n[INFO][INFO] SetColors() Función completada con éxito!!\n");
 	#endif
 	return(1);
-	*/
 }
 
 static void DISPMANX_VideoQuit(_THIS)

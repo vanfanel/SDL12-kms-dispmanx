@@ -138,7 +138,7 @@ old_postuninstall_cmds=""
 LTCC="gcc"
 
 # LTCC compiler flags.
-LTCFLAGS="-O3 -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s -I./include -D_GNU_SOURCE=1"
+LTCFLAGS="-Ofast -march=armv6 -mfpu=vfp -mfloat-abi=hard -I./include -D_GNU_SOURCE=1"
 
 # Take the output of nm and produce a listing of raw symbols and C names.
 global_symbol_pipe="sed -n -e 's/^.*[	 ]\\([ABCDGIRSTW][ABCDGIRSTW]*\\)[	 ][	 ]*\\([_A-Za-z][_A-Za-z0-9]*\\)\$/\\1 \\2 \\2/p'"
@@ -240,7 +240,7 @@ finish_eval=""
 hardcode_into_libs=yes
 
 # Compile-time system search path for libraries.
-sys_lib_search_path_spec="/usr/lib/gcc/arm-linux-gnueabihf/4.6 /usr/lib/arm-linux-gnueabihf /usr/lib /lib/arm-linux-gnueabihf /lib"
+sys_lib_search_path_spec="/usr/lib/gcc/arm-linux-gnueabihf/4.7 /usr/lib/arm-linux-gnueabihf /usr/lib /lib/arm-linux-gnueabihf /lib"
 
 # Run-time system search path for libraries.
 sys_lib_dlsearch_path_spec="/lib /usr/lib /opt/vc/lib /lib/arm-linux-gnueabihf /usr/lib/arm-linux-gnueabihf /usr/local/lib "
@@ -9047,17 +9047,17 @@ file_list_spec=""
 hardcode_action=immediate
 
 # The directories searched by this compiler when creating a shared library.
-compiler_lib_search_dirs="/usr/lib/gcc/arm-linux-gnueabihf/4.6 /usr/lib/gcc/arm-linux-gnueabihf/4.6/../../../arm-linux-gnueabihf /usr/lib/gcc/arm-linux-gnueabihf/4.6/../../.. /lib/arm-linux-gnueabihf /usr/lib/arm-linux-gnueabihf"
+compiler_lib_search_dirs="/usr/lib/gcc/arm-linux-gnueabihf/4.7 /usr/lib/gcc/arm-linux-gnueabihf/4.7/../../../arm-linux-gnueabihf /usr/lib/gcc/arm-linux-gnueabihf/4.7/../../.. /lib/arm-linux-gnueabihf /usr/lib/arm-linux-gnueabihf"
 
 # Dependencies to place before and after the objects being linked to
 # create a shared library.
-predep_objects="/usr/lib/gcc/arm-linux-gnueabihf/4.6/../../../arm-linux-gnueabihf/crti.o /usr/lib/gcc/arm-linux-gnueabihf/4.6/crtbeginS.o"
-postdep_objects="/usr/lib/gcc/arm-linux-gnueabihf/4.6/crtendS.o /usr/lib/gcc/arm-linux-gnueabihf/4.6/../../../arm-linux-gnueabihf/crtn.o"
+predep_objects="/usr/lib/gcc/arm-linux-gnueabihf/4.7/../../../arm-linux-gnueabihf/crti.o /usr/lib/gcc/arm-linux-gnueabihf/4.7/crtbeginS.o"
+postdep_objects="/usr/lib/gcc/arm-linux-gnueabihf/4.7/crtendS.o /usr/lib/gcc/arm-linux-gnueabihf/4.7/../../../arm-linux-gnueabihf/crtn.o"
 predeps=""
 postdeps="-lstdc++ -lm -lgcc_s -lc -lgcc_s"
 
 # The library search path used internally by the compiler when linking
 # a shared library.
-compiler_lib_search_path="-L/usr/lib/gcc/arm-linux-gnueabihf/4.6 -L/usr/lib/gcc/arm-linux-gnueabihf/4.6/../../../arm-linux-gnueabihf -L/usr/lib/gcc/arm-linux-gnueabihf/4.6/../../.. -L/lib/arm-linux-gnueabihf -L/usr/lib/arm-linux-gnueabihf"
+compiler_lib_search_path="-L/usr/lib/gcc/arm-linux-gnueabihf/4.7 -L/usr/lib/gcc/arm-linux-gnueabihf/4.7/../../../arm-linux-gnueabihf -L/usr/lib/gcc/arm-linux-gnueabihf/4.7/../../.. -L/lib/arm-linux-gnueabihf -L/usr/lib/arm-linux-gnueabihf"
 
 # ### END LIBTOOL TAG CONFIG: CXX

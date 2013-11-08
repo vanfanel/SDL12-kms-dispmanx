@@ -340,6 +340,7 @@ const SDL_VideoInfo *SDL_GetVideoInfo(void)
 }
 
 SDL_Rect ** SDL_ListModes (SDL_PixelFormat *format, Uint32 flags){
+	printf ("\nERROR: MAC Dispmanx - the program is calling SDL_ListModes. That shouldn't happen.\n");
 	return NULL;
 }
 /*

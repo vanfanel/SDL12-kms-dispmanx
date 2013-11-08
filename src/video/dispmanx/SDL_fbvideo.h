@@ -16,9 +16,6 @@
 #include "tslib.h"
 #endif
 
-//MAC includes
-#include "bcm_host.h"
-
 //#define debug_mode
 
 #ifdef debug_mode
@@ -50,9 +47,6 @@ typedef struct vidmem_bucket {
 
 /* Private display data */
 struct SDL_PrivateVideoData {
-	DISPMANX_MODEINFO_T cache_modinfo;
-	DISPMANX_MODEINFO_T saved_modinfo;
-
 	int current_vt;
 	int saved_vt;
 	int keyboard_fd;
