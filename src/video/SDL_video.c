@@ -341,7 +341,18 @@ const SDL_VideoInfo *SDL_GetVideoInfo(void)
 
 SDL_Rect ** SDL_ListModes (SDL_PixelFormat *format, Uint32 flags){
 	printf ("\nERROR: MAC Dispmanx - the program is calling SDL_ListModes. That shouldn't happen.\n");
-	return NULL;
+	SDL_VideoDevice *video = current_video;
+        SDL_VideoDevice *this  = current_video;
+        SDL_Rect **modes;
+
+        modes = NULL;
+        if ( SDL_VideoSurface ) {
+                if ( format == NULL ) {
+                        format = SDL_VideoSurface->format;
+                }
+                modes = video->ListModes(this, format, flags);
+        }
+        return(modes);	
 }
 /*
  * Check to see if a particular video mode is supported.

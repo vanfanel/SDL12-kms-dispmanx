@@ -40,6 +40,7 @@
 
 /* Initialization/Query functions */
 static int DISPMANX_VideoInit(_THIS, SDL_PixelFormat *vformat);
+static SDL_Rect **DISPMANX_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags);
 static SDL_Surface *DISPMANX_SetVideoMode(_THIS, SDL_Surface *current, int width, int height, int bpp, Uint32 flags);
 static int DISPMANX_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors);
 static void DISPMANX_VideoQuit(_THIS);
@@ -48,8 +49,10 @@ static void DISPMANX_VideoQuit(_THIS);
 static void DISPMANX_WaitVBL(_THIS);
 static void DISPMANX_WaitIdle(_THIS);
 static void DISPMANX_DirectUpdate(_THIS, int numrects, SDL_Rect *rects);
-static void blank_background(void);
-//static int enter_bpp (_THIS, int bpp);
+static void DISPMANX_BlankBackground(void);
+static int DISPMANX_AddMode(_THIS, unsigned int w, unsigned int h, int index);
+static void DISPMANX_FreeResources(void);
+static void DISPMANX_FreeBackground (void);
 
 //MAC Variables para la inicialización del buffer
 int flip_page = 0;
@@ -57,6 +60,7 @@ int flip_page = 0;
 typedef struct {
     //Grupo de variables para dispmanx, o sea, para el tema de elements, resources, rects...
     //Este grupo de variables son para gestionar elementos visuales.
+
 
     DISPMANX_DISPLAY_HANDLE_T   display;
     DISPMANX_MODEINFO_T         amode;
@@ -72,7 +76,6 @@ typedef struct {
     VC_RECT_T	    bmp_rect;
     int bits_per_pixel;
     int pitch;
-    
     //Grupo de variables para el element en negro de fondo
     DISPMANX_RESOURCE_HANDLE_T  b_resource;
     DISPMANX_ELEMENT_HANDLE_T   b_element;
@@ -146,6 +149,7 @@ static SDL_VideoDevice *DISPMANX_CreateDevice(int devindex)
 
 	/* Set the function pointers */
 	this->VideoInit = DISPMANX_VideoInit;
+	this->ListModes = DISPMANX_ListModes;
 	this->SetVideoMode = DISPMANX_SetVideoMode;
 	this->SetColors = DISPMANX_SetColors;
 	this->UpdateRects = DISPMANX_DirectUpdate;
@@ -175,6 +179,7 @@ VideoBootStrap DISPMANX_bootstrap = {
 
 static int DISPMANX_VideoInit(_THIS, SDL_PixelFormat *vformat)
 {
+
 #ifdef debug_mode
  fp = fopen("SDL_log.txt","w");
 #endif
@@ -207,7 +212,12 @@ static int DISPMANX_VideoInit(_THIS, SDL_PixelFormat *vformat)
 			return(-1);
 		}
 	}
-
+	
+	//Pongo pixmem a NULL para saber en DISPMANX_VideoQuit() si hay que liberar las cosas de dispmanx o no.
+	//Esto es porque en juegos y emuladores tipo MAME y tal se entra por VideoInit() pero no por SetVideoMode(),
+	//donde dispvars->pixmem dejaría de ser NULL y entonces sí tendríamos que liberar cosas.
+	dispvars->pixmem = NULL;
+	
 	/* We're done! */
 	return(0);
 }
@@ -229,30 +239,42 @@ static SDL_Surface *DISPMANX_SetVideoMode(_THIS, SDL_Surface *current,
 //Otra cosa es la tasa de refresco. Tendrás que usar modos físicos 
 //concretos (config.txt) para ajustarte a 50, 60 o 70 Hz.
 	
-	//Pongo pixmem a NULL para saber en SDL_Quit() si hay que liberar las cosas de dispmanx o no.
-	dispvars->pixmem = NULL;
 	//Si nos pasan width=0 y height=0, interpreto que el programa no quiere vídeo sino
 	//que sólo necesita entrar en modo gráfico, así que salto allá:
 	if ((width == 0) | (height == 0)) goto go_video_console;	
-	
-	//MAC Inicializamos el SOC
-	bcm_host_init();
+
+	//MAC Inicializamos el SOC (bcm_host_init) sólo si no hemos pasado antes por aquí. Lo mismo con el fondo.
+	//Si ya hemos pasado antes, hacemos limpieza, pero dejamos el fondo sin tocar.
+	if (dispvars->pixmem != NULL){
+		//Hacemos limpieza de resources, pero dejamos el fondo. No hay problema porque sólo lo ponemos
+		//si no hemos pasado por aquí antes.
+		DISPMANX_FreeResources();	
+	}
+	else {
+    		uint32_t screen = 0;
 		
-	//MAC Abrimos el display dispmanx
-	uint32_t screen = 0;
-	printf("Dispmanx: Opening display %i\n", screen );
-        dispvars->display = vc_dispmanx_display_open( screen );
+		bcm_host_init();
+		
+		//MAC Abrimos el display dispmanx
+		printf("Dispmanx: Opening display %i\n", screen );
+        	dispvars->display = vc_dispmanx_display_open( screen );
+
+		//MAC Recuperamos algunos datos de la configuración del buffer actual
+		vc_dispmanx_display_get_info( dispvars->display, &(dispvars->amode));
+		printf( "Dispmanx: Physical video mode is %d x %d\n", 
+		dispvars->amode.width, dispvars->amode.height );
+		
+		//Ponemos el element de fondo negro tanto si se respeta el ratio como si no, 
+		//porque si no, se nos vería la consola al cambiar de resolución durante el programa.
+		DISPMANX_BlankBackground();
+	}	
 	
-	//MAC Recuperamos algunos datos de la configuración del buffer actual
-	vc_dispmanx_display_get_info( dispvars->display, &(dispvars->amode));
-	printf( "Dispmanx: Physical video mode is %d x %d\n", 
-	   dispvars->amode.width, dispvars->amode.height );
-	
+
+
 	//-------Bloque de lista de resoluciones, originalmente en VideoInit--------------
+	//Para la aplicación SDL, el único modo de vídeo disponible va a ser siempre el que pida. 
 	
-	//Para la aplicación SDL, el modo de vídeo disponible 
-	//va a ser siempre el que pida. Se añade el modo que pide la aplicación,
-	//que es el tamaño que tendrán los resources, y listo. 
+	DISPMANX_AddMode(this, width, height, (((bpp+7)/8)-1));
 
 	//---------------------------------------------------------------------------------	
 	
@@ -323,8 +345,7 @@ static SDL_Surface *DISPMANX_SetVideoMode(_THIS, SDL_Surface *current,
 
 		vc_dispmanx_rect_set( &(dispvars->dst_rect), dst_ypos, 0, 
 	   		dst_width , dispvars->amode.height );
-		//Colocamos fondo negro	
-		blank_background();	
+			
 	}
 
 	
@@ -485,13 +506,10 @@ static SDL_Surface *DISPMANX_SetVideoMode(_THIS, SDL_Surface *current,
 		return (-1);
 	}
 	
-	#ifdef debug_mode
-		fprintf (fp, "\n[INFO][INFO] enter_bpp() Función completada con éxito\n");
-	#endif
 	return 1;
 }*/
 
-static void blank_background(void)
+static void DISPMANX_BlankBackground(void)
 {
   //MAC: Función que simplemente pone un element nuevo cuyo resource es de un sólo píxel de color negro,
   //se escala a pantalla completa y listo.
@@ -521,22 +539,8 @@ static void blank_background(void)
   vc_dispmanx_update_submit_sync( dispvars->b_update );
 }
 
-
-/*static int DISPMANX_InitHWSurfaces(_THIS, SDL_Surface *screen, char *base, int size)
-{
-	//MAC Aquí no hay que hacer nada. No tenemos acceso directo a superficies hardware.
-	return(0);
-}*/
-/*static void DISPMANX_FreeHWSurfaces(_THIS)
-{
-	return;
-}*/
-
 static void DISPMANX_WaitVBL(_THIS)
 {
-
-//MAC Sacado de /usr/include/libdrm/drm.h 
-//ioctl(fd, DRM_IOCTL_WAIT_VBLANK, 0);
 	return;
 }
 
@@ -635,10 +639,65 @@ static int DISPMANX_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *col
 	vc_dispmanx_resource_set_palette(  dispvars->resources[flip_page], pal, 0, sizeof pal );
 	vc_dispmanx_resource_set_palette(  dispvars->resources[!flip_page], pal, 0, sizeof pal );
 
-	#ifdef debug_mode
-		fprintf (fp,"\n[INFO][INFO] SetColors() Función completada con éxito!!\n");
-	#endif
 	return(1);
+}
+
+
+static int DISPMANX_AddMode(_THIS, unsigned int w, unsigned int h, int index)
+{
+          int i;
+
+	  //Sólo metemos un modo de vídeo en cada momento, así que empezamos con la limpieza.
+	  for (i=0; i < NUM_MODELISTS; ++i){
+		free(SDL_modelist[i]);
+		SDL_modelist[i] = NULL;
+		SDL_nummodes[i] = 0;
+	  }
+
+	  //NUM_MODELISTS está definido como 4, para 8, 16, 24 y 32 bpp. Pero no lo usamos.
+	  SDL_Rect *mode;
+	  mode = (SDL_Rect *)SDL_malloc(sizeof *mode);
+	  mode->x = 0;
+       	  mode->y = 0;
+          mode->w = w;
+          mode->h = h;	  
+		
+	  SDL_modelist[index] = (SDL_Rect **)
+ 	  SDL_realloc(SDL_modelist[index], sizeof(SDL_Rect *));
+
+	  SDL_nummodes[index] = 1;
+	  SDL_modelist[index][0] = mode;
+	  SDL_modelist[index][1] = NULL;
+	  //Ponemos el miembro siguiente a NULL porque así es como se cierra la lista y los programas esperan eso.
+ 
+	  return (0); 
+}
+
+static SDL_Rect **DISPMANX_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags)
+{
+	return(SDL_modelist[((format->BitsPerPixel+7)/8)-1]);
+}
+
+static void DISPMANX_FreeResources(void){
+	free (dispvars->pixmem);
+	      
+	//MAC liberamos lo relacionado con dispmanx
+	dispvars->update = vc_dispmanx_update_start( 0 );
+    	
+    	vc_dispmanx_resource_delete( dispvars->resources[0] );
+    	vc_dispmanx_resource_delete( dispvars->resources[1] );
+	vc_dispmanx_element_remove(dispvars->update, dispvars->element);
+	
+	vc_dispmanx_update_submit_sync( dispvars->update );		
+}
+
+static void DISPMANX_FreeBackground (void) {
+	dispvars->b_update = vc_dispmanx_update_start( 0 );
+    	
+	vc_dispmanx_resource_delete( dispvars->b_resource );
+	vc_dispmanx_element_remove ( dispvars->b_update, dispvars->b_element);
+	
+	vc_dispmanx_update_submit_sync( dispvars->b_update );
 }
 
 static void DISPMANX_VideoQuit(_THIS)
@@ -649,40 +708,22 @@ static void DISPMANX_VideoQuit(_THIS)
 		hw_lock = NULL;
 	}
 
-	if (dispvars->pixmem != NULL) {
-	   free (dispvars->pixmem);
-	      
-	   //MAC liberamos lo relacionado con dispmanx
-	   dispvars->update = vc_dispmanx_update_start( 0 );
-    	
-    	   vc_dispmanx_resource_delete( dispvars->resources[0] );
-    	   vc_dispmanx_resource_delete( dispvars->resources[1] );
-	   vc_dispmanx_element_remove(dispvars->update, dispvars->element);
-	
-	   vc_dispmanx_update_submit_sync( dispvars->update );		
-	
-	   //----------Quitamos el element y su resource que se usan para el fondo negro.
-	   if (!dispvars->ignore_ratio){
-		dispvars->b_update = vc_dispmanx_update_start( 0 );
-    	
-		vc_dispmanx_resource_delete( dispvars->b_resource );
-		vc_dispmanx_element_remove ( dispvars->b_update, dispvars->b_element);
-	
-		vc_dispmanx_update_submit_sync( dispvars->b_update );
-	   }		
-	   //----------------------------------------------------------------------------
-	
-	   vc_dispmanx_display_close( dispvars->display );
- 	   bcm_host_deinit();
+	if (dispvars->pixmem != NULL){ 
+		int i;
+		for (i=0; i < NUM_MODELISTS; ++i){
+			free(SDL_modelist[i]);
+			SDL_modelist[i] = NULL;
+			SDL_nummodes[i] = 0;
+	  	}
+		DISPMANX_FreeResources();
+		DISPMANX_FreeBackground();
+		vc_dispmanx_display_close( dispvars->display );
+		bcm_host_deinit();
 	}
-	
+
 	DISPMANX_CloseMouse(this);
 	DISPMANX_CloseKeyboard(this);
 	
-	//Si hemos cambiado el bpp del framebuffer usando el viejo interface fbdev, lo restauramos a los 16bpp
-	/*if (dispvars->pix_format == VC_IMAGE_8BPP)
-		enter_bpp (this, 16);
-	*/
 	//MAC Set custom video mode block 2
 	//Reestablecemos el modo de vídeo original
 	/*if (dispvars->isResChanged){

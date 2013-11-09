@@ -60,6 +60,10 @@ struct SDL_PrivateVideoData {
 	DISPMANX_bitBlit *blitFunc;
 	int physlinebytes; /* Length of a line in bytes in physical fb */
 
+#define NUM_MODELISTS   4               /* 8, 16, 24, and 32 bits-per-pixel */
+         int SDL_nummodes[NUM_MODELISTS];
+         SDL_Rect **SDL_modelist[NUM_MODELISTS];
+
 	vidmem_bucket surfaces;
 	int surfaces_memtotal;
 	int surfaces_memleft;
