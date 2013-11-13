@@ -124,7 +124,6 @@ static SDL_VideoDevice *DISPMANX_CreateDevice(int devindex)
 		getchar();
 	#endif
 
-
 	SDL_VideoDevice *this;
 
 	/* Initialize all variables that we clean on shutdown */
