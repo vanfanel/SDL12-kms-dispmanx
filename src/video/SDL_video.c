@@ -465,19 +465,9 @@ SDL_Surface * SDL_SetVideoMode (int width, int height, int bpp, Uint32 flags)
 {
 	SDL_VideoDevice *video, *this;
 	SDL_Surface *prev_mode, *mode;
-	//MAC Esto no hace falta. Se usaba para los modos devueltos por GetVideoMode().
-	//int video_w;
-	//int video_h;
 	int video_bpp;
 	int is_opengl;
 	SDL_GrabMode saved_grab;
-	
-	//MAC Forzamos las características de un buffer fullscreen ignorando lo que 
-        //pida la aplicación. También se hace en SDL_fbvideo.c. NO se fuerza DOUBLEBUF porque
-	//la idea es que se llame a SDL_UpdateRect(0,0,0,0) si el programador llama a SDL_Flip()
-	//sin activar el flag SDL_DOUBLEBUF. No hacerlo así rompe la API. Es mejor retocar las apps.
-        //flags |= SDL_FULLSCREEN;
-        if (bpp > 8)
 	
 	#ifdef WIN32
 		sysevents_mouse_pressed = 0;
@@ -506,6 +496,7 @@ SDL_Surface * SDL_SetVideoMode (int width, int height, int bpp, Uint32 flags)
 		bpp = SDL_VideoSurface->format->BitsPerPixel;
 	}
 
+	/* There's no palette in > 8 bits-per-pixel mode */
 	video_bpp = bpp;
 	if ( video_bpp > 8 ) {
 		flags &= ~SDL_HWPALETTE;
@@ -559,7 +550,6 @@ SDL_Surface * SDL_SetVideoMode (int width, int height, int bpp, Uint32 flags)
 	SDL_LockCursor();
 	SDL_VideoSurface = NULL;	/* In case it's freed by driver */
 	
-	//mode = video->SetVideoMode(this, prev_mode,video_w,video_h,video_bpp,flags);
 	mode = video->SetVideoMode(this,prev_mode, width, height, video_bpp, flags);
 	if ( mode ) { /* Prevent resize events from mode change */
           /* But not on OS/2 */

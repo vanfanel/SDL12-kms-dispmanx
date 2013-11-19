@@ -212,11 +212,21 @@ static int DISPMANX_VideoInit(_THIS, SDL_PixelFormat *vformat)
 		}
 	}
 	
+	//MAC Esto es necesario para que SDL_SetVideoMode de SDL_Video.c (NO DISPMANX_SetVideoMode()) no
+	//se piense que tenemos un modo con paleta, porque eso har�a que se llamase a DISPMANX_SetColors
+	//desde SDL_SetVideoMode(). Esto ocurre porque no es la parte de DISPMANX donde se asigna el 
+	//format a mode (que es lo que retorna DISPMANX_SetVideoMode())	sino que nos viene asignado de la 
+	//llamada a SDL_CreateRGBSurface() de SDL_VideoInit().
+	vformat->BitsPerPixel = 16;
+	vformat->Rmask = 0;
+	vformat->Gmask = 0;
+	vformat->Bmask = 0;
+	
 	//Pongo pixmem a NULL para saber en DISPMANX_VideoQuit() si hay que liberar las cosas de dispmanx o no.
 	//Esto es porque en juegos y emuladores tipo MAME y tal se entra por VideoInit() pero no por SetVideoMode(),
 	//donde dispvars->pixmem dejaría de ser NULL y entonces sí tendríamos que liberar cosas.
 	dispvars->pixmem = NULL;
-	
+		
 	/* We're done! */
 	return(0);
 }
