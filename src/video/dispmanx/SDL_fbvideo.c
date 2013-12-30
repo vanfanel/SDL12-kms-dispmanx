@@ -347,6 +347,11 @@ static SDL_Surface *DISPMANX_SetVideoMode(_THIS, SDL_Surface *current,
 	else {
 		float orig_ratio = ((float)width / (float)height); 
 		int dst_width = dispvars->amode.height * orig_ratio;	
+		
+		//Si la anchura de la imÃgen escalada nos sale mayor que el ancho fÃsico de pantalla,
+		//mantenemos el ancho fÃsico de pantalla como anchura mÃxima.
+		if (dst_width > dispvars->amode.width) dst_width = dispvars->amode.width;
+
 		int dst_ypos  = (dispvars->amode.width - dst_width) / 2; 
 		printf ("\nUsing proportion ratio: %d / %d = %f", width, height, orig_ratio);
 		printf ("\nProgram rect, respecting original ratio: %d x %d \n", 
