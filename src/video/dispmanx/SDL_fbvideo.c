@@ -76,6 +76,7 @@ typedef struct {
     VC_RECT_T	    bmp_rect;
     int bits_per_pixel;
     int pitch;
+
     //Grupo de variables para el element en negro de fondo
     DISPMANX_RESOURCE_HANDLE_T  b_resource;
     DISPMANX_ELEMENT_HANDLE_T   b_element;
@@ -84,16 +85,6 @@ typedef struct {
     //Variable para saber si el usuario ha seteado la varable de entorno de ignorar ratio
     int ignore_ratio;
 
-    //Grupo de variables para el vc_tv_service, que se usan para cosas como recuperar el modo gráfico físico,
-    //la lista de modos disponibles, establecer nuevo modo físico...No mezclar con dispmanx que es para 
-    //elementos visuales. Están en la misma estructura por no definir otra.
-    //Este tipo de variables las defino y uso localmente, pero algunas necesito tenerlas 
-    //globalmente accesibles, como original_tv_state, que servirá para reestablecer el modo físico original al salir. 
-    //int isResChanged;    
-    //TV_DISPLAY_STATE_T *original_tv_state;
-    //Paleta auxiliar para poder hacer la conversión de 8bpp a 32bpp.Su valor se recoge en SetColors().
-    //SDL_Color* shadowpal;
-	
 } __DISPMAN_VARIABLES_T;
 
 
@@ -116,11 +107,11 @@ static void DISPMANX_DeleteDevice(SDL_VideoDevice *device)
 
 static SDL_VideoDevice *DISPMANX_CreateDevice(int devindex)
 {
-	//MAC Esta función no toca nada del framebuffer sino que 
-	//sólo inicializa la memoria interna de lo que en SDL es una
-	//abstracción del dispositivo.
+	//MAC Esta funcion no toca nada del framebuffer sino que 
+	//solo inicializa la memoria interna de lo que en SDL es una
+	//abstraccion del dispositivo.
 	#ifdef debug_mode
-		printf ("\n[DEBUG] Esperando pulsación de tecla para gdb remoto...");
+		printf ("\n[DEBUG] Esperando pulsacion de tecla para gdb remoto...");
 		getchar();
 	#endif
 
@@ -202,8 +193,8 @@ static int DISPMANX_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	if ( DISPMANX_OpenMouse(this) < 0 ) {
 		const char *sdl_nomouse;
 		//MAC Si esto da problemas, es por los premisos de gpm sobre
-		//el ratón en /dev/mice. Edita /etc/init.d/gpm y añade
-		//en la sección start() la línea chmod 0666{MOUSEDEV}
+		//el raton en /dev/mice. Edita /etc/init.d/gpm y aniade
+		//en la seccion start() la linea chmod 0666{MOUSEDEV}
 		sdl_nomouse = SDL_getenv("SDL_NOMOUSE");
 		if ( ! sdl_nomouse ) {
 			printf("\nERR - Couldn't open mouse. Look for permissions in /etc/init.d/gpm.\n");
@@ -213,7 +204,7 @@ static int DISPMANX_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	}
 	
 	//MAC Esto es necesario para que SDL_SetVideoMode de SDL_Video.c (NO DISPMANX_SetVideoMode()) no
-	//se piense que tenemos un modo con paleta, porque eso har�a que se llamase a DISPMANX_SetColors
+	//se piense que tenemos un modo con paleta, porque eso haria que se llamase a DISPMANX_SetColors
 	//desde SDL_SetVideoMode(). Esto ocurre porque no es la parte de DISPMANX donde se asigna el 
 	//format a mode (que es lo que retorna DISPMANX_SetVideoMode())	sino que nos viene asignado de la 
 	//llamada a SDL_CreateRGBSurface() de SDL_VideoInit().
@@ -224,7 +215,7 @@ static int DISPMANX_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	
 	//Pongo pixmem a NULL para saber en DISPMANX_VideoQuit() si hay que liberar las cosas de dispmanx o no.
 	//Esto es porque en juegos y emuladores tipo MAME y tal se entra por VideoInit() pero no por SetVideoMode(),
-	//donde dispvars->pixmem dejaría de ser NULL y entonces sí tendríamos que liberar cosas.
+	//donde dispvars->pixmem dejara�a de ser NULL y entonces si�tendriamos que liberar cosas.
 	dispvars->pixmem = NULL;
 		
 	/* We're done! */
@@ -234,29 +225,27 @@ static int DISPMANX_VideoInit(_THIS, SDL_PixelFormat *vformat)
 static SDL_Surface *DISPMANX_SetVideoMode(_THIS, SDL_Surface *current,
 				int width, int height, int bpp, Uint32 flags)
 {
-//MAC Recuerda que aquí, originalmente, nos llegagan las dimensiones de un modo de vídeo
-// aproximado en SDL_Video.c de entre los modos de vídeo disponibles. AHORA YA NO.
+//MAC Recuerda que aqui�,originalmente, nos llegaban las dimensiones de un modo de video
+// aproximado en SDL_Video.c de entre los modos de video disponibles. AHORA YA NO.
 //Ahora lo que hacemos es que nos lleguen directamente la altura y anchura del modo 
-//en el que quiere correr la aplicación, 
-//Luego se escala ese modo, de cuanta menos resolución mejor, (ya que hay
-//que hacer una escritura de ram a grafica en la función FlipHWScreen), al modo físico, que
-//es en realidad el único modo gráfico que existe, el modo en que hemos arrancado.
-//Esto explica por qué creamos el plano de overlay a parte, 
-//ya que cuando SDL_Video.c llama a SetVideoMode aún no se tienen listos los 
-//offsets horizontal y vertical donde empieza el modo de vídeo pequeño 
-//(el modo en que corre la app internamente) sobre el grande (el modo físico).
-//Otra cosa es la tasa de refresco. Tendrás que usar modos físicos 
-//concretos (config.txt) para ajustarte a 50, 60 o 70 Hz.
+//en el que quiere correr la aplicacion, 
+//Luego se escala ese modo, de cuanta menos resolucion mejor, (ya que hay
+//que hacer una escritura de ram a grafica en la funcion FlipHWScreen), al modo fisico, que
+//es en realidad el unico modo grafico que existe, el modo en que hemos arrancado.
+//Esto explica por que creamos el plano de overlay a parte, 
+//ya que cuando SDL_Video.c llama a SetVideoMode aun no se tienen listos los 
+//offsets horizontal y vertical donde empieza el modo de video pequenio 
+//(el modo en que corre la app internamente) sobre el grande (el modo fisico).
 	
-	//Si nos pasan width=0 y height=0, interpreto que el programa no quiere vídeo sino
-	//que sólo necesita entrar en modo gráfico, así que salto allá:
+	//Si nos pasan width=0 y height=0, interpreto que el programa no quiere video sino
+	//que solo necesita entrar en modo grafico, asi que salto alli:
 	if ((width == 0) | (height == 0)) goto go_video_console;	
 
-	//MAC Inicializamos el SOC (bcm_host_init) sólo si no hemos pasado antes por aquí. Lo mismo con el fondo.
+	//MAC Inicializamos el SOC (bcm_host_init) SOLO si no hemos pasado antes por aqui�. Lo mismo con el fondo.
 	//Si ya hemos pasado antes, hacemos limpieza, pero dejamos el fondo sin tocar.
 	if (dispvars->pixmem != NULL){
-		//Hacemos limpieza de resources, pero dejamos el fondo. No hay problema porque sólo lo ponemos
-		//si no hemos pasado por aquí antes.
+		//Hacemos limpieza de resources, pero dejamos el fondo. No hay problema porque solo lo ponemos
+		//si no hemos pasado por aqui antes.
 		DISPMANX_FreeResources();	
 	}
 	else {
@@ -268,20 +257,20 @@ static SDL_Surface *DISPMANX_SetVideoMode(_THIS, SDL_Surface *current,
 		printf("Dispmanx: Opening display %i\n", screen );
         	dispvars->display = vc_dispmanx_display_open( screen );
 
-		//MAC Recuperamos algunos datos de la configuración del buffer actual
+		//MAC Recuperamos algunos datos de la configuracion del buffer actual
 		vc_dispmanx_display_get_info( dispvars->display, &(dispvars->amode));
 		printf( "Dispmanx: Physical video mode is %d x %d\n", 
 		dispvars->amode.width, dispvars->amode.height );
 		
 		//Ponemos el element de fondo negro tanto si se respeta el ratio como si no, 
-		//porque si no, se nos vería la consola al cambiar de resolución durante el programa.
+		//porque si no, se nos vera�a la consola al cambiar de resolucion durante el programa.
 		DISPMANX_BlankBackground();
 	}	
 	
 
 
 	//-------Bloque de lista de resoluciones, originalmente en VideoInit--------------
-	//Para la aplicación SDL, el único modo de vídeo disponible va a ser siempre el que pida. 
+	//Para la aplicacion SDL, el unico modo de video disponible va a ser siempre el que pida. 
 	
 	DISPMANX_AddMode(this, width, height, (((bpp+7)/8)-1));
 
@@ -291,13 +280,14 @@ static SDL_Surface *DISPMANX_SetVideoMode(_THIS, SDL_Surface *current,
 	Uint32 Gmask;
 	Uint32 Bmask;
 	
+	//dispvars->pitch = width * ((bpp+7) /8);
+
+	//MAC Establecemos el pitch en funcion del bpp deseado
+        //Lo alineamos a 16 porque es el aligment interno de dispmanx(en ejemp)
 	dispvars->bits_per_pixel = bpp;	
-	
-	//MAC Establecemos el pitch en función del bpp deseado	
-    	//Lo alineamos a 16 porque es el aligment interno de dispmanx(en ejemp)
-	dispvars->pitch = ( ALIGN_UP( width, 16 ) * (bpp/8) );
-	//Alineamos la atura a 16 por el mismo motivo (ver ejemplo hello_disp)
-	height = ALIGN_UP( height, 16);
+        dispvars->pitch = ( ALIGN_UP( width, 16 ) * (bpp/8) );
+        //Alineamos la atura a 16 por el mismo motivo (ver ejemplo hello_disp)
+        height = ALIGN_UP( height, 16);
 
 	switch (bpp){
 	   case 8:
@@ -323,21 +313,21 @@ static SDL_Surface *DISPMANX_SetVideoMode(_THIS, SDL_Surface *current,
 	printf ("\nUsing internal program mode: %d x %d %d bpp", 
 		width, height, dispvars->bits_per_pixel);	
 
-	//MAC Por ahora en DISPMANX usamos el mismo modo q ya está establecido
+	//MAC Por ahora en DISPMANX usamos el mismo modo q ya esta establecido
 	printf ("\nUsing physical mode: %d x %d %d bpp",
 		dispvars->amode.width, dispvars->amode.height,
 		dispvars->bits_per_pixel);
 	
 	//-----------------------------------------------------------------------------
-	//Esta parte no es fundamental, sólo sirve para conservar el ratio del juego.
-	//Si no se hace y simplemente quitas estas líneas, se estira al modo físico y ya, 
-	//quedando la imágen deformada si es de 4:3 en una tele de 16:9, que es lo que pasaba antes.	
-	//Simplemente hallamos ese ratio y con él hallamos la nueva anchura, considerando
-	//como altura la máxima física que tenemos establecida, o sea, la altura del modo físico establecido. 
-	//También se calcula la posición horizontal en que debe empezar el rect de destino (dst_ypos), 
-	//para que no quede pegado a la parte izquierda de la pantalla al ser menor que la resolución física, que
+	//Esta parte no es fundamental, solo sirve para conservar el ratio del juego.
+	//Si no se hace y simplemente quitas estas lineas, se estira al modo fisico y ya, 
+	//quedando la imagen deformada si es de 4:3 en una tele de 16:9, que es lo que pasaba antes.	
+	//Simplemente hallamos ese ratio y con el hallamos la nueva anchura, considerando
+	//como altura la maxima fisica que tenemos establecida, o sea, la altura del modo fisico establecido. 
+	//Tambien se calcula la posicion horizontal en que debe empezar el rect de destino (dst_ypos), 
+	//para que no quede pegado a la parte izquierda de la pantalla al ser menor que la resolucion fisica, que
 	//obviamente no cambia. 
-	//Queda obsoleto si cambiamos la resolución a una que tenga el mismo ratio que el modo original del juego.
+	//Queda obsoleto si cambiamos la resolucion a una que tenga el mismo ratio que el modo original del juego.
 	
 	dispvars->ignore_ratio = (int) SDL_getenv("SDL_DISPMANX_IGNORE_RATIO");
 
@@ -348,8 +338,8 @@ static SDL_Surface *DISPMANX_SetVideoMode(_THIS, SDL_Surface *current,
 		float orig_ratio = ((float)width / (float)height); 
 		int dst_width = dispvars->amode.height * orig_ratio;	
 		
-		//Si la anchura de la im�gen escalada nos sale mayor que el ancho f�sico de pantalla,
-		//mantenemos el ancho f�sico de pantalla como anchura m�xima.
+		//Si la anchura de la imagen escalada nos sale mayor que el ancho fisico de pantalla,
+		//mantenemos el ancho fisico de pantalla como anchura maxima.
 		if (dst_width > dispvars->amode.width) dst_width = dispvars->amode.width;
 
 		int dst_ypos  = (dispvars->amode.width - dst_width) / 2; 
@@ -362,33 +352,29 @@ static SDL_Surface *DISPMANX_SetVideoMode(_THIS, SDL_Surface *current,
 			
 	}
 
-	
-	//------------------------------------------------------------------------------
-	
-	
 	//---------------------------Dejamos configurados los rects---------------------
-	//Recuerda que los rects NO contienen ninguna información visual, sólo son tamaño, rectángulos
-	//descritos para que los entiendan las funciones vc, sólo tamaños de áreas.
+	//Recuerda que los rects NO contienen ninguna informacion visual, solo son tamanio, rectangulos
+	//descritos para que los entiendan las funciones vc, solo tamanios de areas.
 	//
-	//bmp_rect: se usa sólo para el volcado del buffer en RAM al resource que toque. Define el tamaño
-	//del área a copiar de RAM (pixmem) al resource (dispmam->resources[]) usando write_data(), por
+	//bmp_rect: se usa solo para el volcado del buffer en RAM al resource que toque. Define el tamanio
+	//del area a copiar de RAM (pixmem) al resource (dispmam->resources[]) usando write_data(), por
 	//eso, y para acabarlo de entender del todo, su altura y anchura son las internas del juego, width y height.
 	//
-	//src_rect y dst_rect: se usan porque un element necesita dos rects definidos: src_rect es el tamaño del área
-	//de entrada, o sea, el tamaño con el que clipeamos la imágen de orígen, y dst_rect es el tamaño del área de
-	//salida, o sea, el tamaño con que se verá, escalada por hardware, en el element.
+	//src_rect y dst_rect: se usan porque un element necesita dos rects definidos: src_rect es el tamanio del area
+	//de entrada,o sea, el tamanio con el que clipeamos la imagen de origen, y dst_rect es el tamanio del area de
+	//salida, o sea, el tamanio con que se vera, escalada por hardware, en el element.
 	//
-	//Por todo esto, src_rect tendrá generalmente la altura y anchura de la imágen original, o dicho de otro
-	//modo la altura y anchura que usa el juego internamente (width << 16 y height << 16 por algún rollo de
-	//tamaño de variable), y dst_rect tendrá las dimensiones del área de pantalla a la que queremos escalar
-	//esa imágen: si le damos las dimensiones físicas totales de la pantalla, escalará sin respetar el ratio.   
-	//Así que lo he corregido manteniendo la altura máxima de la pantalla física, y calculando la anchura
-	//a partir de dicha altura y el ratio de la imágen (de la resolución del juego) original.
+	//Por todo esto, src_rect tendra generalmente la altura y anchura de la imagen original, o dicho de otro
+	//modo la altura y anchura que usa el juego internamente (width << 16 y height << 16 por algun rollo de
+	//tamanio de variable), y dst_rect tendra las dimensiones del area de pantalla a la que queremos escalar
+	//esa imagen: si le damos las dimensiones fisicas totales de la pantalla, escalara sin respetar el ratio.   
+	//Asi�que lo he corregido manteniendo la altura maxima de la pantalla fisica, y calculando la anchura
+	//a partir de dicha altura y el ratio de la imagen (de la resolucion del juego) original.
 	//
 	//Debes pensar siempre de la siguiente manera: un element, que es como un cristal-lupa, un resource 
-	//(aunque tengas dos, en un momento dado el element sólo tiene uno) que es como la imágen original,
-	//muy pequeñita al fondo, y un "embudo", cuyo tamaño del extremo inferior pegado a la imágen original 
-	//es de tamaño src_rect, y cuyo tamaño del extremo superior, pegado al element, es de tamaño dst_rect.
+	//(aunque tengas dos, en un momento dado el element solo tiene uno) que es como la imagen original,
+	//muy pequenita al fondo, y un "embudo", cuyo tamanio del extremo inferior pegado a la imagen original 
+	//es de tamanio src_rect, y cuyo tamanio del extremo superior, pegado al element, es de tamanio dst_rect.
 	
 	vc_dispmanx_rect_set (&(dispvars->bmp_rect), 0, 0, 
 	   width, height);	
@@ -420,11 +406,7 @@ static SDL_Surface *DISPMANX_SetVideoMode(_THIS, SDL_Surface *current,
     	dispvars->pixmem = calloc( 1, dispvars->pitch * height);
     	//dispvars->pixmem=malloc ( dispvars->pitch * dispvars->amode.height );
 
-	//MAC Esto se usa, como mínimo y que yo sepa, para DirectUpdate
-	//cache_modinfo = *modinfo;	
-	//cache_fbinfo  = *(drmModeGetFB (fd, fb_id));	
-	
-	//MAC Esta llamada a ReallocFormat es lo que impedía ver algo...
+	//MAC Esta llamada a ReallocFormat es lo que impedia�a ver algo...
 	Rmask = 0;
 	Gmask = 0;
 	Bmask = 0;
@@ -434,17 +416,17 @@ static SDL_Surface *DISPMANX_SetVideoMode(_THIS, SDL_Surface *current,
 	
 	//Preparamos SDL para trabajar sobre el nuevo framebuffer
 
-	//No queremos HWSURFACEs por la manera en que funciona nuestro backend, ya que la app sólo
+	//No queremos HWSURFACEs por la manera en que funciona nuestro backend, ya que la app solo
 	//debe conocer el buffer en RAM para que las actualizaciones no sean bloqueantes.
-	//TAMPOCO queremos DOUBLEBUFFER: realmente piensa lo que estás haciendo: actualizas la 
-	//superficie de vídeo, que está en la RAM, copias a VRAM y, saltándote las normas del API,
-	//esperas a evento de vsync para hacer el buffer swapping. Así que la app NO SABE NADA de 
-	//double buffering ni debe saberlo. UpdateRect() debe hacer lo que antes hacía FlipHWSurface,
-	//ya que de cara a la APP, sólo hay una actualización del buffer de dibujado, NO de pantalla,
+	//TAMPOCO queremos DOUBLEBUFFER: realmente piensa lo que estas haciendo: actualizas la 
+	//superficie de video, que esta en la RAM, copias a VRAM y, saltandote las normas del API,
+	//esperas a evento de vsync para hacer el buffer swapping. Asi� que la app NO SABE NADA de 
+	//double buffering ni debe saberlo. UpdateRect() debe hacer lo que antes hacia�a FlipHWSurface,
+	//ya que de cara a la APP, solo hay una actualizacion del buffer de dibujado, NO de pantalla,
 	//ya que carecemos de acceso directo a la VRAM.
-	//Permitimos HWPALETTEs, cosa que sólo se activa si el juego pide un modo de 8bpp porque,
+	//Permitimos HWPALETTEs, cosa que solo se activa si el juego pide un modo de 8bpp porque,
 	//tanto si conseguimos modificar la paleta por hard como si tenemos que indexar los valores
-	//como estamos haciendo hasta ahora emulando así la paleta, nos interesa que los juegos
+	//como estamos haciendo hasta ahora emulando asi la paleta, nos interesa que los juegos
 	//entren en SetColors(), y sin paleta por hardware no entran.
 	
 	current->flags |= SDL_FULLSCREEN;	
@@ -470,7 +452,7 @@ static SDL_Surface *DISPMANX_SetVideoMode(_THIS, SDL_Surface *current,
 	//this->screen = current;
 	//this->screen = NULL;
 
-	//Añadimos el element.
+	//Aniadimos el element.
 	dispvars->update = vc_dispmanx_update_start( 0 );
 	
 	dispvars->element = vc_dispmanx_element_add( dispvars->update, 
@@ -483,7 +465,7 @@ static SDL_Surface *DISPMANX_SetVideoMode(_THIS, SDL_Surface *current,
 	
 	/* We're done */
 	//MAC Disable graphics 1
-	//Aquí ponemos la terminal en modo gráfico. Ya no se imprimirán más mensajes en la consola a partir de aquí. 
+	//Aqui ponemos la terminal en modo grafico. Ya no se imprimiran mas mensajes en la consola a partir de aqui. 
 	go_video_console:
 	if ( DISPMANX_EnterGraphicsMode(this) < 0 )
         	return(NULL);
@@ -493,9 +475,9 @@ static SDL_Surface *DISPMANX_SetVideoMode(_THIS, SDL_Surface *current,
 }
 
 /*static int enter_bpp (_THIS, int bpp){
-	//MAC Esta función es un poco chapuza porque cambia el modo de vídeo a un bpp a través del viejo
+	//MAC Esta funcion es un poco chapuza porque cambia el modo de video a un bpp a traves del viejo
 	//interface de fbdev. Por eso lo primero es abrir el file descriptor del fb. Si se va a usar, eso
-	//se debería pasar a SetVideoMode(), en la parte donde se evalúa el bpp.
+	//se debera�a pasar a SetVideoMode(), en la parte donde se evalua el bpp.
 	 
 	const char* SDL_fbdev;
 	struct fb_var_screeninfo vinfo;
@@ -525,7 +507,7 @@ static SDL_Surface *DISPMANX_SetVideoMode(_THIS, SDL_Surface *current,
 
 static void DISPMANX_BlankBackground(void)
 {
-  //MAC: Función que simplemente pone un element nuevo cuyo resource es de un sólo píxel de color negro,
+  //MAC: Funcion que simplemente pone un element nuevo cuyo resource es de un solo pixel de color negro,
   //se escala a pantalla completa y listo.
   
   // we create a 1x1 black pixel image that is added to display just behind video
@@ -568,19 +550,19 @@ static void DISPMANX_WaitIdle(_THIS)
 
 static void DISPMANX_DirectUpdate(_THIS, int numrects, SDL_Rect *rects)
 {	
-	//En OpenGL también va así. No deberíamos esperar para cambiar el buffer, de hecho la aplicación
+	//En OpenGL tambi�n va as��. No deber�amos esperar para cambiar el buffer, de hecho la aplicaci�n
 	//piensa que no hay doble buffer (hasta hemos desactivado el double buffer), sino que en lugar
-	//de esperar, simplemente deberíamos actualizar la superficie visible directamente... Pero no
-	//puedo hacer eso porque no tengo acceso a la superficie visible: tengo la superficie de vídeo en RAM
-	//y cada vez que se hace un cambio (o sea, cada vez que llego aquí) copio esa superficie a la VRAM
-	//y espero a cambiar los buffers para no tener tearing, a pesar de que esta función se supone que no
-	//hace eso. Pero en OpenGL se hace lo mismo ya que la única manera de mostrar los cambios es hacer
-	//un GL_SWAP_BUFFERS que también es bloqueante. 
+	//de esperar, simplemente deber�amos actualizar la superficie visible directamente... Pero no
+	//puedo hacer eso porque no tengo acceso a la superficie visible: tengo la superficie de v�deo en RAM
+	//y cada vez que se hace un cambio (o sea, cada vez que llego aqu��) copio esa superficie a la VRAM
+	//y espero a cambiar los buffers para no tener tearing, a pesar de que esta funci�n se supone que no
+	//hace eso. Pero en OpenGL se hace lo mismo ya que la �nica manera de mostrar los cambios es hacer
+	//un GL_SWAP_BUFFERS que tambi�n es bloqueante. 
 	//Volcamos desde el ram bitmap buffer al dispmanx resource buffer que toque. cada vez a uno.	
 	vc_dispmanx_resource_write_data( dispvars->resources[flip_page], 
 	   dispvars->pix_format, dispvars->pitch, dispvars->pixmem, 
 	   &(dispvars->bmp_rect) );
-	//**Empieza actualización***
+	//Empieza actualizaci�n
 	dispvars->update = vc_dispmanx_update_start( 0 );
 
 	vc_dispmanx_element_change_source(dispvars->update, 
@@ -588,7 +570,7 @@ static void DISPMANX_DirectUpdate(_THIS, int numrects, SDL_Rect *rects)
 	
 	vc_dispmanx_update_submit_sync( dispvars->update );		
 	//vc_dispmanx_update_submit(dispvars->update, NULL, NULL); 
-	//**Acaba actualización***
+	//Acaba actualizaci�n
 	flip_page = !flip_page;
 	
 	return;
@@ -596,17 +578,17 @@ static void DISPMANX_DirectUpdate(_THIS, int numrects, SDL_Rect *rects)
 
 /*static void DISPMANX_DirectUpdate8bpp(_THIS, int numrects, SDL_Rect *rects)
 {	
-	//Versión que incluye conversión de 8bpp paletado a 32bpp directos.
+	//Version que incluye conversion de 8bpp paletado a 32bpp directos.
 	//NO OLVIDES recoger dispvars->shadowpal en SetColors si usas esto.
 	int i,p;
 	int32_t red, green, blue;
 	int npixels = dispvars->bmp_rect.width * dispvars->bmp_rect.height;
 
 	for (i = 0; i < (npixels); i++){
-			//p es simplemente un índice. Nos sirve como entero decimal.
+			//p es simplemente un indice. Nos sirve como entero decimal.
 			p = (int) *((char*)dispvars->pixmem+i);
 			
-			//Los 5 bits de más peso para R	
+			//Los 5 bits de mas peso para R	
 			red = dispvars->shadowpal[p].r; 			
 			red <<= 16 ;
 				
@@ -614,7 +596,7 @@ static void DISPMANX_DirectUpdate(_THIS, int numrects, SDL_Rect *rects)
 			green = dispvars->shadowpal[p].g; 
 			green <<= 8;
 				
-			//Los de menos peso, más a la derecha, para B
+			//Los de menos peso, mas a la derecha, para B
 			blue = dispvars->shadowpal[p].b; 
 			blue <<= 0;				
 				
@@ -739,7 +721,7 @@ static void DISPMANX_VideoQuit(_THIS)
 	DISPMANX_CloseKeyboard(this);
 	
 	//MAC Set custom video mode block 2
-	//Reestablecemos el modo de vídeo original
+	//Reestablecemos el modo de video original
 	/*if (dispvars->isResChanged){
 		int ret = vc_tv_hdmi_power_on_explicit_new(HDMI_MODE_HDMI, 
 		dispvars->original_tv_state->display.hdmi.group,

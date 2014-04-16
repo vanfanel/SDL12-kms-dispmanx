@@ -7,7 +7,7 @@ depend	= build-deps
 prefix = /usr/local
 exec_prefix = ${prefix}
 bindir	= ${exec_prefix}/bin
-libdir  = /usr/local/lib
+libdir  = ${exec_prefix}/lib
 includedir = ${prefix}/include
 datarootdir = ${prefix}/share
 datadir	= ${datarootdir}
@@ -21,10 +21,10 @@ distfile = $(distdir).tar.gz
 SHELL	= /bin/bash
 CC      = gcc
 INCLUDE = -I./include
-CFLAGS  = -Ofast -march=armv6 -mfpu=vfp -mfloat-abi=hard 
+CFLAGS  = -Ofast -march=armv6j -mfpu=vfp -mfloat-abi=hard 
 EXTRA_CFLAGS = -I./include -D_GNU_SOURCE=1 -fvisibility=hidden  -DSTANDALONE -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS -DTARGET_POSIX -D_LINUX -fPIC -DPIC -D_REENTRANT -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -U_FORTIFY_SOURCE -Wall -DHAVE_LIBOPENMAX=2 -DOMX -DOMX_SKIP64BIT -ftree-vectorize -pipe -DUSE_EXTERNAL_OMX -DHAVE_LIBBCM_HOST -DUSE_EXTERNAL_LIBBCM_HOST -DUSE_VCHIQ_ARM -Wno-psabi -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -I/opt/vc/include/interface/vmcs_host/linux -D_REENTRANT -DHAVE_LINUX_VERSION_H -Wall
 LDFLAGS = 
-EXTRA_LDFLAGS =  -lm -ldl -L/opt/vc/lib -lGLESv2 -lEGL -lbcm_host -lvcos -lvchiq_arm -lpthread
+EXTRA_LDFLAGS =  -lm -ldl -L/opt/vc/lib -lbcm_host -lvcos -lvchiq_arm -lpthread
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
 INSTALL = /usr/bin/install -c
 NASM	=  

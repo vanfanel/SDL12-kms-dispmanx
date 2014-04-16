@@ -2,7 +2,7 @@
 
 prefix=/usr/local
 exec_prefix=${prefix}
-libdir=/usr/local/lib
+libdir=${exec_prefix}/lib
 includedir=${prefix}/include
 
 Name: sdl
@@ -11,5 +11,5 @@ Version: 1.2.15
 Requires:
 Conflicts:
 Libs: -L${libdir} -Wl,-rpath,${libdir} -lSDL  -lpthread
-Libs.private: -lSDL  -lpthread  -lm -ldl -L/opt/vc/lib -lGLESv2 -lEGL -lbcm_host -lvcos -lvchiq_arm -lpthread
+Libs.private: -lSDL  -lpthread  -lm -ldl -L/opt/vc/lib -lbcm_host -lvcos -lvchiq_arm -lpthread
 Cflags: -I${includedir}/SDL -D_GNU_SOURCE=1 -D_REENTRANT
