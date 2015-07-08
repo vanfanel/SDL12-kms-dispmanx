@@ -639,9 +639,8 @@ void SDL_DrawCursorNoLock(SDL_Surface *screen)
 
 void SDL_DrawCursor(SDL_Surface *screen)
 {
-	return;
 	/* Lock the screen if necessary */
-	/*if ( screen == NULL ) {
+	if ( screen == NULL ) {
 		return;
 	}
 	if ( SDL_MUSTLOCK(screen) ) {
@@ -668,7 +667,7 @@ void SDL_DrawCursor(SDL_Surface *screen)
 		if ( video->UpdateRects ) {
 			video->UpdateRects(this, 1, &area);
 		}
-	}*/
+	}
 }
 
 void SDL_EraseCursorNoLock(SDL_Surface *screen)
